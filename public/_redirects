@@ -1,0 +1,6 @@
+# Mirrors netlify.toml so drag-and-drop deploys behave the same as Git deploys.
+# While the marketplace is closed, the bare domain lands on the team page.
+/               /FIRST          302!
+/first          /FIRST          301!
+/tidechallenge  /game           301!
+/*              /index.html     200

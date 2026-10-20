@@ -1,0 +1,44 @@
+[build]
+  command = "npm run build"
+  publish = "dist/tide-crew/browser"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# While the marketplace is closed, the bare domain lands on the team page.
+# Remove this block (and set environment.storeOpen = true) the day the store opens.
+[[redirects]]
+  from = "/"
+  to = "/FIRST"
+  status = 302
+  force = true
+
+# Friendly lowercase aliases (Angular paths are case-sensitive).
+[[redirects]]
+  from = "/first"
+  to = "/FIRST"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/tidechallenge"
+  to = "/game"
+  status = 301
+  force = true
+
+# Single-page app fallback — must stay last.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  for = "/docs/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300"

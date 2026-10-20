@@ -1,0 +1,96 @@
+<tc-tide mode="rise" />
+
+<!-- HERO ─ one Gate line, one orchestrated entrance -->
+<section class="hero" [class.is-in]="entered()">
+  <div class="hero__copy">
+    <p class="kicker">{{ hero.kicker }}</p>
+    <h1 class="anthem">
+      <span class="anthem__mask"><span class="anthem__text">Ride the Tide</span></span>
+    </h1>
+    <tc-wake class="hero__wake" [play]="entered()" width="min(340px, 70vw)" style="--d: 520ms" />
+    <p class="intro">{{ hero.intro }}</p>
+    <div class="actions">
+      <a routerLink="/game" class="btn">Conoce TideChallenge</a>
+      <a routerLink="/FIRST" fragment="patrocina" class="btn btn--ghost">Patrocina una temporada</a>
+    </div>
+  </div>
+
+  @if (lead) {
+    <a class="hero__team" [href]="contact.tba" target="_blank" rel="noopener"
+       [attr.aria-label]="'Equipo ' + lead.number + ', ' + lead.name + ', en The Blue Alliance'">
+      <span class="hero__num">{{ lead.number }}</span>
+      <span class="hero__name">{{ lead.name }}</span>
+      <span class="hero__prog">{{ lead.program }}</span>
+    </a>
+  }
+</section>
+
+<!-- LA TRIPULACIÓN -->
+<section id="tripulacion" class="block crew">
+  <div class="crew__text">
+    <h2 class="title">{{ crew.title }}</h2>
+    <p class="body">{{ crew.body }}</p>
+  </div>
+
+  <ul class="manifest" aria-label="Equipos de la tripulación">
+    @for (t of teams; track t.number) {
+      <li class="manifest__row">
+        <span class="manifest__num">{{ t.number }}</span>
+        <span class="manifest__who">
+          <strong>{{ t.name }}</strong>
+          <span>{{ t.program }}</span>
+          <span class="muted">{{ t.home }}</span>
+        </span>
+      </li>
+    }
+  </ul>
+</section>
+
+<!-- VALORES ─ they light up as the water passes them -->
+<section class="block beliefs" aria-labelledby="beliefs-title">
+  <h2 id="beliefs-title" class="title">En lo que creemos</h2>
+  <ul class="values">
+    @for (v of values; track v) {
+      <li #val class="value">{{ v }}</li>
+    }
+  </ul>
+</section>
+
+<!-- OFFSEASON → TideChallenge -->
+<section id="temporada" class="block season">
+  <div class="season__text">
+    <h2 class="title">{{ season.title }}</h2>
+    <p class="body">{{ season.body }}</p>
+  </div>
+  <a routerLink="/game" class="challenge">
+    <span class="challenge__name">TideChallenge</span>
+    <span class="challenge__desc">Manual, campo, actualizaciones y preguntas: todos los materiales del reto en un solo lugar.</span>
+    <span class="challenge__go">{{ season.cta }}</span>
+  </a>
+</section>
+
+<!-- PATROCINIO -->
+<section id="patrocina" class="block sponsor">
+  <div class="sponsor__text">
+    <h2 class="title">{{ sponsorText.title }}</h2>
+    <p class="body">{{ sponsorText.body }}</p>
+    <a class="btn" [href]="mailto">{{ sponsorText.cta }}</a>
+  </div>
+
+  @if (sponsors.length) {
+    <ul class="wall">
+      @for (s of sponsors; track s.name) {
+        <li class="wall__item" [attr.data-tier]="s.tier">
+          <a [href]="s.url || null" target="_blank" rel="noopener">
+            @if (s.logo) { <img [src]="s.logo" [alt]="s.name" loading="lazy" /> } @else { {{ s.name }} }
+          </a>
+        </li>
+      }
+    </ul>
+  } @else {
+    <a class="wall wall--empty" [href]="mailto">
+      <span>{{ sponsorText.empty }}</span>
+      <span class="wall__slot">Tu marca aquí</span>
+    </a>
+  }
+</section>

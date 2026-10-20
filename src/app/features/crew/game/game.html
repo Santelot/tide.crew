@@ -1,0 +1,83 @@
+<tc-tide mode="low" />
+
+<header class="head">
+  <p class="crumb"><a routerLink="/FIRST">TideCrew</a> / Materiales de temporada</p>
+  <h1 class="anthem">{{ c.name }}</h1>
+  <tc-wake [play]="true" width="min(300px, 64vw)" />
+  <p class="summary">{{ c.summary }}</p>
+
+  <dl class="facts">
+    <div><dt>Temporada</dt><dd>{{ c.season }}</dd></div>
+    <div><dt>Publicados</dt><dd>{{ published }} de {{ total }} materiales</dd></div>
+    <div><dt>Última actualización</dt><dd>{{ lastUpdate ? fmt(lastUpdate) : 'Muy pronto' }}</dd></div>
+  </dl>
+
+  <ol class="dates" aria-label="Fechas clave">
+    @for (d of dates; track d.label) {
+      <li [class.is-tba]="!d.date">
+        <span class="dates__when">{{ fmt(d.date) }}</span>
+        <span class="dates__what">{{ d.label }}</span>
+      </li>
+    }
+  </ol>
+</header>
+
+<div class="hub">
+  <nav class="index" aria-label="Secciones de materiales">
+    <ul>
+      @for (s of sections; track s.id) {
+        <li>
+          <a routerLink="/game" [fragment]="s.id" [class.is-here]="active() === s.id"
+             [attr.aria-current]="active() === s.id ? 'true' : null">{{ s.title }}</a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="sections">
+    @for (s of sections; track s.id) {
+      <section class="sec" [id]="s.id" [attr.aria-labelledby]="s.id + '-t'">
+        <h2 class="sec__title" [id]="s.id + '-t'">{{ s.title }}</h2>
+        @if (s.intro) { <p class="sec__intro">{{ s.intro }}</p> }
+
+        @if (s.items.length) {
+          <ul class="docs">
+            @for (m of s.items; track m.title) {
+              <li class="doc" [class.is-soon]="!m.href">
+                <span class="doc__kind" [attr.data-kind]="m.kind">{{ m.kind }}</span>
+                <span class="doc__main">
+                  <span class="doc__title">{{ m.title }}</span>
+                  <span class="doc__desc">{{ m.desc }}</span>
+                  @if (m.href && (m.version || m.updated || m.size)) {
+                    <span class="doc__meta">
+                      @if (m.version) { <span>Versión {{ m.version }}</span> }
+                      @if (m.updated) { <span>{{ fmt(m.updated) }}</span> }
+                      @if (m.size) { <span>{{ m.size }}</span> }
+                    </span>
+                  }
+                </span>
+                @if (m.href) {
+                  <a class="doc__act" [href]="m.href"
+                     [attr.target]="isExternal(m) ? '_blank' : null"
+                     [attr.rel]="isExternal(m) ? 'noopener' : null"
+                     [attr.download]="m.kind === 'PDF' || m.kind === 'ZIP' ? '' : null">
+                    {{ actionLabel(m) }}<span class="sr"> — {{ m.title }}</span>
+                  </a>
+                } @else {
+                  <span class="doc__act doc__act--soon">Próximamente</span>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="sec__empty">{{ s.empty }}</p>
+        }
+      </section>
+    }
+
+    <p class="contact">
+      ¿Dudas que no son de reglas? Escríbenos a
+      <a [href]="'mailto:' + c.contact">{{ c.contact }}</a>.
+    </p>
+  </div>
+</div>

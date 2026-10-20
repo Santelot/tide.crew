@@ -1,0 +1,68 @@
+/* ============================================================
+   TideCrew design tokens — Deep (dark) is the default tide.
+   ============================================================ */
+:root {
+  /* Brand */
+  --tc-pacific:  #00A6B8;
+  --tc-crest:    #00CFE6;
+  --tc-night:    #111921;
+  --tc-foam:     #FFFBFE;
+  --tc-undertow: #00434A;
+  --tc-slate:    #2B4055;
+  --tc-coral:    #FFAD85;
+
+  /* Wake — status */
+  --tc-danger:  #CC2225;
+  --tc-warning: #F8D718;
+  --tc-success: #36AB50;
+  --tc-info:    #4466EB;
+
+  /* Radius */
+  --tc-radius-sharp: 3px;
+  --tc-radius-card:  12px;
+  --tc-radius-pill:  999px;
+
+  /* Type — English anthem in display, Spanish conversation in body */
+  --tc-font-display:   'Gate', 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --tc-font-title:     'Boldena', 'Archivo', system-ui, sans-serif;
+  --tc-font-editorial: 'Elms Sans', system-ui, sans-serif;
+  --tc-font-body:      'Roboto', system-ui, sans-serif;
+
+  /* Surfaces */
+  --tc-bg:  var(--tc-night);
+  --tc-ink: var(--tc-foam);
+}
+
+/* Daylight is the exception, not the rule. Toggle with <html data-theme="daylight"> */
+[data-theme='daylight'] {
+  --tc-bg:  var(--tc-foam);
+  --tc-ink: var(--tc-night);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--tc-bg);
+  color: var(--tc-ink);
+  font-family: var(--tc-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+
+/* Shared scaffold used by placeholder routes */
+.page { padding: clamp(2rem, 6vh, 4rem) 1.5rem; max-width: 64rem; margin: 0 auto; }
+.page__title { font-family: var(--tc-font-title); font-size: clamp(1.8rem, 5vw, 2.6rem); margin: 0 0 .4rem; }
+.page__note { color: color-mix(in srgb, var(--tc-ink) 65%, transparent); }
+code { font-family: ui-monospace, monospace; color: var(--tc-crest); }
+
+/* Brand fonts — drop the licensed files into public/fonts/ with these exact names
+   (they come from TideCrew_Design_System.zip). Until then the stand-ins load. */
+@font-face { font-family: 'Gate'; font-style: normal; src: local('Gate'), url('/fonts/gate-regular.otf') format('opentype'); font-display: swap; }
+@font-face { font-family: 'Gate'; font-style: italic; src: local('Gate Italic'), url('/fonts/gate-italic.otf') format('opentype'); font-display: swap; }
+@font-face { font-family: 'Boldena'; font-weight: 400 900; src: local('Boldena'), url('/fonts/boldenabold-vgjmz.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Elms Sans'; font-weight: 100 900; src: url('/fonts/ElmsSans-VariableFont_wght.ttf') format('truetype'); font-display: swap; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+::selection { background: var(--tc-crest); color: var(--tc-night); }
+body { overflow-x: hidden; }
