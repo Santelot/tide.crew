@@ -52,13 +52,20 @@ export class CrewLayout implements OnInit, OnDestroy {
 
   private raf = 0;
   private lastY = 0;
-  private sub = this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
+  private sub = this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
     this.menu.set(false);
     this.motion.lock(false);
+    // Every new page starts at the top. Smooth scrolling keeps its own idea of the
+    // scroll position, so without this a new page could open wherever the last one was.
+    if (!(e as NavigationEnd).urlAfterRedirects.includes('#')) {
+      this.motion.jump(0);
+      setTimeout(() => this.motion.jump(0), 60);
+    }
     queueMicrotask(() => this.probe());
   });
 
   ngOnInit() {
+    try { history.scrollRestoration = 'manual'; } catch { /* not supported */ }
     this.motion.start();
     if (!this.loader()) this.intro.clear();
     else this.motion.lock(true);

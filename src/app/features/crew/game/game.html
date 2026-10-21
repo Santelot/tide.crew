@@ -1,81 +1,138 @@
-<header class="head" data-tone="light">
-  <p class="crumb"><a routerLink="/FIRST">TideCrew</a> / Materiales de temporada</p>
-  <h1 class="anthem">{{ c.name }}</h1>
-  <tc-wake [play]="true" width="min(300px, 64vw)" style="--tk: 8px; color: var(--tc-pacific)" />
-  <p class="summary">{{ c.summary }}</p>
+<tc-ocean />
 
-  <dl class="facts">
-    <div><dt>Temporada</dt><dd>{{ c.season }}</dd></div>
-    <div><dt>Publicados</dt><dd>{{ published }} de {{ total }} materiales</dd></div>
-    <div><dt>Última actualización</dt><dd>{{ lastUpdate ? fmt(lastUpdate) : 'Muy pronto' }}</dd></div>
-  </dl>
+<!-- ═══ HERO — rising out of the deep ════════════════════════════════════ -->
+<header class="hero" #hero data-tone="dark" data-water>
+  <div class="wrap hero__top">
+    <p class="crumb" data-in><a routerLink="/FIRST">TideCrew</a><span aria-hidden="true">/</span>TideChallenge</p>
+    <p class="season" data-in>{{ c.season }} · Reto offseason abierto a todos los equipos</p>
+  </div>
 
-  <ol class="dates" aria-label="Fechas clave">
-    @for (d of dates; track d.label) {
-      <li [class.is-tba]="!d.date">
-        <span class="dates__when">{{ fmt(d.date) }}</span>
-        <span class="dates__what">{{ d.label }}</span>
-      </li>
-    }
-  </ol>
-</header>
+  <h1 class="sr">TideChallenge</h1>
+  <div class="marq" aria-hidden="true">
+    <div class="marq__track" #track>
+      @for (k of [0, 1, 2, 3]; track k) {
+        <span class="marq__item">TideChallenge</span><tc-mark class="marq__mk" tone="white" label="" />
+      }
+    </div>
+  </div>
 
-<div class="hub" data-tone="light">
-  <nav class="index" aria-label="Secciones de materiales">
-    <ul>
-      @for (s of sections; track s.id) {
-        <li>
-          <a routerLink="/game" [fragment]="s.id" [class.is-here]="active() === s.id"
-             [attr.aria-current]="active() === s.id ? 'true' : null">{{ s.title }}</a>
+  <div class="wrap hero__grid">
+    <div class="hero__intro">
+      <p class="summary" data-in>{{ c.summary }}</p>
+      <nav class="quick" data-in aria-label="Accesos rápidos">
+        <a class="qbtn qbtn--solid" href="/game#manual" (click)="go($event, 'manual')">Manual del juego</a>
+        <a class="qbtn" href="/game#preguntas" (click)="go($event, 'preguntas')">Preguntas y respuestas</a>
+        <a class="qbtn" href="/game#registro" (click)="go($event, 'registro')">Registrar equipo</a>
+      </nav>
+    </div>
+
+    <div class="clock" data-in>
+      @if (next(); as m) {
+        <p class="clock__label">Siguiente hito · <strong>{{ labels[m.id].label }}</strong></p>
+        <div class="clock__digits" role="timer" aria-live="off">
+          @for (u of countdown(); track $index; let i = $index) {
+            <span class="digit"><b>{{ u }}</b><small>{{ ['días', 'horas', 'min', 'seg'][i] }}</small></span>
+          }
+        </div>
+        <p class="clock__when">{{ fmt(m.at, true) }}</p>
+      } @else {
+        <p class="clock__label">El reto ya se jugó. Gracias por remar con nosotros.</p>
+      }
+    </div>
+  </div>
+
+  <div class="wrap">
+    <ol class="tideline" data-in [style.--p]="progress()">
+      <span class="tideline__rail" aria-hidden="true"><span class="tideline__fill"></span></span>
+      @for (m of milestones(); track m.id) {
+        <li [class.is-done]="m.state === 'done'" [class.is-next]="m.state === 'next'">
+          <span class="tideline__dot" aria-hidden="true"></span>
+          <span class="tideline__date">{{ fmt(m.at) }}</span>
+          <span class="tideline__what">{{ labels[m.id].label }}</span>
+          <span class="tideline__hint">{{ labels[m.id].hint }}</span>
         </li>
       }
-    </ul>
-  </nav>
+    </ol>
+  </div>
+</header>
 
-  <div class="sections">
-    @for (s of sections; track s.id) {
-      <section class="sec" [id]="s.id" [attr.aria-labelledby]="s.id + '-t'">
-        <h2 class="sec__title" [id]="s.id + '-t'">{{ s.title }}</h2>
-        @if (s.intro) { <p class="sec__intro">{{ s.intro }}</p> }
+<!-- ═══ HUB — every material in one place ═══════════════════════════════ -->
+<div class="hub" data-tone="light">
+  <svg class="surface" viewBox="0 0 2880 120" preserveAspectRatio="none" aria-hidden="true">
+    <path class="surface__back" d="M0 70 Q360 30 720 70 T1440 70 T2160 70 T2880 70 L2880 120 L0 120 Z" />
+    <path class="surface__front" d="M0 80 Q180 52 360 80 T720 80 T1080 80 T1440 80 T1800 80 T2160 80 T2520 80 T2880 80 L2880 120 L0 120 Z" />
+  </svg>
 
-        @if (s.items.length) {
-          <ul class="docs">
-            @for (m of s.items; track m.title) {
-              <li class="doc" [class.is-soon]="!m.href">
-                <span class="doc__kind" [attr.data-kind]="m.kind">{{ m.kind }}</span>
-                <span class="doc__main">
+  <div class="hub__grid">
+    <nav class="index" aria-label="Secciones de materiales">
+      <p class="index__k">Materiales</p>
+      <ul>
+        @for (s of sections; track s.id) {
+          <li>
+            <a [href]="'/game#' + s.id" (click)="go($event, s.id)" [class.is-here]="active() === s.id"
+               [attr.aria-current]="active() === s.id ? 'true' : null">{{ s.title }}</a>
+          </li>
+        }
+      </ul>
+      <p class="index__count"><b>{{ published }}</b> de {{ total }} publicados</p>
+    </nav>
+
+    <div class="sections">
+      @for (s of sections; track s.id; let si = $index) {
+        <section class="sec" [id]="s.id" [attr.aria-labelledby]="s.id + '-t'" data-reveal>
+          <header class="sec__head">
+            <span class="sec__n">0{{ si + 1 }}</span>
+            <h2 class="sec__title" [id]="s.id + '-t'">{{ s.title }}</h2>
+          </header>
+          @if (s.intro) { <p class="sec__intro">{{ s.intro }}</p> }
+
+          @if (s.id === 'preguntas') {
+            <div class="qa" [class.is-open]="qaOpen()">
+              <span class="qa__state">{{ qaOpen() ? 'Abiertas' : 'Cerradas' }}</span>
+              <p class="qa__text">
+                @if (qaOpen()) { Puedes enviar preguntas hasta el {{ fmt(milestones()[2].at) }}. }
+                @else { Las preguntas abren el {{ fmt(milestones()[1].at) }} y cierran el {{ fmt(milestones()[2].at) }}. }
+                Cada respuesta oficial se publica aquí para todos los equipos.
+              </p>
+            </div>
+          }
+
+          @if (s.items.length) {
+            <ul class="docs">
+              @for (m of s.items; track m.title) {
+                <li class="doc" [class.is-soon]="!m.href">
+                  <span class="doc__kind" [attr.data-kind]="m.kind">{{ m.kind }}</span>
                   <span class="doc__title">{{ m.title }}</span>
                   <span class="doc__desc">{{ m.desc }}</span>
                   @if (m.href && (m.version || m.updated || m.size)) {
                     <span class="doc__meta">
-                      @if (m.version) { <span>Versión {{ m.version }}</span> }
-                      @if (m.updated) { <span>{{ fmt(m.updated) }}</span> }
+                      @if (m.version) { <span>v{{ m.version }}</span> }
+                      @if (m.updated) { <span>{{ fmtShort(m.updated) }}</span> }
                       @if (m.size) { <span>{{ m.size }}</span> }
                     </span>
                   }
-                </span>
-                @if (m.href) {
-                  <a class="doc__act" [href]="m.href"
-                     [attr.target]="isExternal(m) ? '_blank' : null"
-                     [attr.rel]="isExternal(m) ? 'noopener' : null"
-                     [attr.download]="m.kind === 'PDF' || m.kind === 'ZIP' ? '' : null">
-                    {{ actionLabel(m) }}<span class="sr"> — {{ m.title }}</span>
-                  </a>
-                } @else {
-                  <span class="doc__act doc__act--soon">Próximamente</span>
-                }
-              </li>
-            }
-          </ul>
-        } @else {
-          <p class="sec__empty">{{ s.empty }}</p>
-        }
-      </section>
-    }
+                  @if (m.href) {
+                    <a class="doc__act" [href]="m.href"
+                       [attr.target]="isExternal(m) ? '_blank' : null"
+                       [attr.rel]="isExternal(m) ? 'noopener' : null"
+                       [attr.download]="m.kind === 'PDF' || m.kind === 'ZIP' ? '' : null">
+                      {{ actionLabel(m) }} <span aria-hidden="true">→</span><span class="sr"> — {{ m.title }}</span>
+                    </a>
+                  } @else {
+                    <span class="doc__act doc__act--soon">Próximamente</span>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="sec__empty">{{ s.empty }}</p>
+          }
+        </section>
+      }
 
-    <p class="contact">
-      ¿Dudas que no son de reglas? Escríbenos a
-      <a [href]="'mailto:' + c.contact">{{ c.contact }}</a>.
-    </p>
+      <p class="contact" data-reveal>
+        ¿Dudas que no son de reglas? Escríbenos a <a [href]="'mailto:' + c.contact">{{ c.contact }}</a>.
+      </p>
+    </div>
   </div>
 </div>

@@ -6,7 +6,6 @@
  *   2. Set its `href` below to '/docs/tidechallenge/manual-v1.pdf' and fill `updated`.
  *   An item without `href` shows as "Próximamente".
  *
- * Confirm every line marked  // CONFIRMAR
  */
 
 export const CHALLENGE = {
@@ -14,21 +13,17 @@ export const CHALLENGE = {
   season: 'Offseason 2026',
   summary:
     'Un reto offseason diseñado por TideCrew para seguir construyendo entre temporadas. ' +
-    'Lo compartimos con cualquier equipo que quiera jugarlo: aquí vive todo lo que necesitas.',
+    'Lo abrimos a cualquier equipo que quiera jugarlo: aquí vive todo lo que necesitas.',
   contact: 'mariana.gomezb@tec.mx',
 };
 
-export interface KeyDate {
-  label: string;
-  date?: string; // 'YYYY-MM-DD' — sin fecha = "Por anunciar"
-}
-
-export const KEY_DATES: KeyDate[] = [
-  { label: 'Publicación del manual', date: '2026-10-26' },
-  { label: 'Abren las preguntas', date: '2026-10-30' },
-  { label: 'Cierran las preguntas', date: '2026-11-20' },
-  { label: 'Día del reto', date: '2026-12-05' },
-];
+/** Labels for the shared milestones (dates live in landing.content.ts → MILESTONES). */
+export const MILESTONE_LABELS: Record<string, { label: string; hint: string }> = {
+  manual: { label: 'Publicación del manual', hint: 'Reglas, campo y puntuación.' },
+  qaOpen: { label: 'Abren las preguntas', hint: 'Envía dudas sobre las reglas.' },
+  qaClose: { label: 'Cierran las preguntas', hint: 'Última respuesta oficial.' },
+  event: { label: 'Día del reto', hint: 'A la cancha.' },
+};
 
 export type Kind = 'PDF' | 'CAD' | 'Video' | 'Enlace' | 'Formulario' | 'ZIP';
 

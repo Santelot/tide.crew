@@ -42,8 +42,9 @@ export class MotionService {
 
   /** Jump instantly (used while the screen is covered). */
   jump(y: number) {
-    if (this.lenis) this.lenis.scrollTo(y, { immediate: true, force: true });
+    if (this.lenis) { this.lenis.resize(); this.lenis.scrollTo(y, { immediate: true, force: true }); }
     else window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+    ScrollTrigger.refresh();
   }
 
   scrollTo(target: string | HTMLElement | number, offset = 0) {
