@@ -69,8 +69,9 @@ float cellEdge(vec2 p, float t){
 float swell(float x, float H, float t){
   float u = x / H;
   float c = uChop;
-  return H * ((0.009 + c * 0.018) * sin(u * 6.0 + t * (0.85 + c))
-            + (0.005 + c * 0.012) * sin(u * 13.0 - t * (1.25 + c * 1.5) + 1.7)
+  // Speed stays constant (a changing speed would jump the phase); scrolling only lifts the waves.
+  return H * ((0.009 + c * 0.010) * sin(u * 6.0 + t * 0.85)
+            + (0.005 + c * 0.007) * sin(u * 13.0 - t * 1.25 + 1.7)
             + 0.002 * sin(u * 29.0 + t * 2.1));
 }
 
@@ -398,7 +399,8 @@ export class Ocean implements AfterViewInit, OnDestroy {
     this.lastY = y;
     if (!this.reduced) {
       this.vel += (Math.max(-1, Math.min(1, dy / 60)) - this.vel) * 0.15;
-      this.chop += (Math.min(1, Math.abs(dy) / 45) - this.chop) * (Math.abs(dy) > 2 ? 0.12 : 0.03);
+      // Waves build up gently and settle slowly: no sudden jumps.
+      this.chop += (Math.min(1, Math.abs(dy) / 60) - this.chop) * (Math.abs(dy) > 2 ? 0.04 : 0.02);
     }
     // Ripples live in screen space: carry them along with the page.
     if (dy !== 0) for (let k = 0; k < 8; k++) this.ripples[k * 4 + 1] -= dy * this.dpr;
