@@ -12,7 +12,7 @@
 .hero {
   position: relative; color: var(--tc-foam);
   background: linear-gradient(180deg, var(--tc-night) 0%, var(--tc-undertow) 45%, #008D9C 100%);
-  padding: calc(68px + clamp(2.5rem, 7vh, 4.5rem)) 0 clamp(6rem, 14vh, 9rem);
+  padding: calc(64px + clamp(2.5rem, 7vh, 4.5rem)) 0 clamp(6rem, 14vh, 9rem);
 }
 :host(.ocean-on) .hero { background: transparent; }
 .hero__top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .6rem 2rem; }
@@ -114,7 +114,10 @@
 .qa { display: flex; align-items: center; gap: 1rem; margin: 1.4rem 0 0; padding: 1rem 1.2rem; border-radius: var(--tc-radius-card); background: color-mix(in srgb, var(--tc-pacific) 8%, #fff); border: 1px solid color-mix(in srgb, var(--tc-pacific) 25%, transparent); }
 .qa__state { flex: none; padding: .45rem .75rem; border-radius: 999px; font: 600 .75rem/1 var(--tc-font-body); text-transform: uppercase; letter-spacing: .08em; background: var(--tc-night); color: var(--tc-foam); }
 .qa.is-open .qa__state { background: var(--tc-success); }
-.qa__text { margin: 0; font: 400 .98rem/1.5 var(--tc-font-body); }
+.qa__text { margin: 0; font: 400 .98rem/1.5 var(--tc-font-body); flex: 1; }
+.qa__go { flex: none; padding: .7rem 1rem; border-radius: 3px; background: var(--tc-night); color: var(--tc-foam); text-decoration: none; font: 600 .9rem/1 var(--tc-font-body); transition: background-color .25s; }
+.qa__go:hover { background: var(--tc-pacific); }
+@media (max-width: 640px) { .qa { flex-wrap: wrap; } }
 
 .docs { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .9rem; }
 .doc {

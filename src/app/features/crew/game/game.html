@@ -1,3 +1,4 @@
+<tc-hub-nav here="hub" />
 <tc-ocean />
 
 <!-- ═══ HERO — rising out of the deep ════════════════════════════════════ -->
@@ -92,8 +93,9 @@
               <p class="qa__text">
                 @if (qaOpen()) { Puedes enviar preguntas hasta el {{ fmt(milestones()[2].at) }}. }
                 @else { Las preguntas abren el {{ fmt(milestones()[1].at) }} y cierran el {{ fmt(milestones()[2].at) }}. }
-                Cada respuesta oficial se publica aquí para todos los equipos.
+                Cada respuesta oficial se publica para todos los equipos.
               </p>
+              <a class="qa__go" routerLink="/game/qa">Ir al Q&amp;A <span aria-hidden="true">→</span></a>
             </div>
           }
 
@@ -111,7 +113,9 @@
                       @if (m.size) { <span>{{ m.size }}</span> }
                     </span>
                   }
-                  @if (m.href) {
+                  @if (m.href && m.href.startsWith('/game/')) {
+                    <a class="doc__act" [routerLink]="m.href">{{ actionLabel(m) }} <span aria-hidden="true">→</span></a>
+                  } @else if (m.href) {
                     <a class="doc__act" [href]="m.href"
                        [attr.target]="isExternal(m) ? '_blank' : null"
                        [attr.rel]="isExternal(m) ? 'noopener' : null"

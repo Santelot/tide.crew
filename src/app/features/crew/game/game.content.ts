@@ -82,10 +82,9 @@ export const SECTIONS: Section[] = [
   {
     id: 'preguntas',
     title: 'Preguntas y respuestas',
-    intro: '¿Una regla no queda clara? Envíanos tu pregunta y publicaremos la respuesta para todos los equipos.',
+    intro: '¿Una regla no queda clara? Cada equipo registrado recibe un código para preguntar. Todas las respuestas son oficiales y públicas.',
     items: [
-      { title: 'Enviar una pregunta', desc: 'Una pregunta por envío, citando la regla.', kind: 'Formulario' },
-      { title: 'Respuestas publicadas', desc: 'Todas las respuestas oficiales en un solo documento.', kind: 'PDF' },
+      { title: 'Q&A oficial', desc: 'Busca respuestas publicadas o, con tu código de equipo, envía una pregunta.', kind: 'Enlace', href: '/game/qa' },
     ],
   },
   {

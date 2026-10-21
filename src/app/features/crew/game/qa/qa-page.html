@@ -1,0 +1,167 @@
+<tc-hub-nav here="qa" />
+
+<header class="top" data-tone="dark">
+  <div class="wrap top__grid">
+    <div>
+      <p class="crumb"><a routerLink="/game">TideChallenge</a><span aria-hidden="true">/</span>Q&amp;A</p>
+      <h1 class="h1">Preguntas y respuestas</h1>
+      <p class="lead">
+        Las respuestas del Q&amp;A son oficiales y complementan al manual. Antes de preguntar, busca:
+        es muy probable que otro equipo ya haya preguntado lo mismo.
+      </p>
+    </div>
+    @if (status(); as st) {
+      <div class="state" [class.is-open]="st.open">
+        <span class="state__dot" aria-hidden="true"></span>
+        <div>
+          <p class="state__k">{{ st.open ? 'Q&A abierto' : 'Q&A cerrado' }}</p>
+          <p class="state__v">
+            {{ stateText(st) }}
+          </p>
+          <p class="state__n"><b>{{ st.published }}</b> {{ st.published === 1 ? 'respuesta publicada' : 'respuestas publicadas' }}</p>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="wrap">
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+      <input type="search" [value]="search()" (input)="onSearch($any($event.target).value)"
+             placeholder="Busca por palabra, regla (G101) o número de pregunta (Q12)" aria-label="Buscar en el Q&A" />
+      @if (search()) { <button type="button" class="search__x" (click)="onSearch('')" aria-label="Limpiar búsqueda">×</button> }
+    </div>
+    <div class="chips" role="group" aria-label="Filtrar por sección">
+      <button type="button" [class.on]="section() === ''" (click)="pickSection('')">Todas</button>
+      @for (s of sections; track s.id) {
+        <button type="button" [class.on]="section() === s.id" (click)="pickSection(s.id)">{{ s.label }}</button>
+      }
+    </div>
+  </div>
+</header>
+
+<div class="body-grid wrap">
+  <section class="list" id="qa-list" aria-live="polite" aria-busy="{{ loading() }}">
+    @if (loadError()) {
+      <p class="empty">{{ loadError() }} <button type="button" class="link" (click)="refresh()">Reintentar</button></p>
+    } @else if (loading() && !items().length) {
+      @for (k of [0, 1, 2]; track k) { <div class="skeleton"></div> }
+    } @else if (!items().length) {
+      <div class="empty">
+        @if (search() || section()) {
+          <p><b>No encontramos preguntas con esa búsqueda.</b></p>
+          <p>Prueba con otras palabras o con el número de la regla. Si de verdad nadie lo ha preguntado, ¡pregúntalo tú!</p>
+        } @else {
+          <p><b>Todavía no hay respuestas publicadas.</b></p>
+          <p>Cuando el Game Design Team responda la primera pregunta, aparecerá aquí con su número.</p>
+        }
+      </div>
+    } @else {
+      <p class="count">{{ items().length }} {{ items().length === 1 ? 'pregunta' : 'preguntas' }}{{ search() ? ' para “' + search() + '”' : '' }}</p>
+      @for (q of items(); track q.id) {
+        <tc-qa-card [item]="q" (look)="lookFor($event)" />
+      }
+    }
+  </section>
+
+  <aside class="side">
+    @if (qa.team(); as t) {
+      <div class="panel">
+        <div class="panel__who">
+          <p><span class="ok" aria-hidden="true"></span>Equipo <b>{{ t.number }}</b>@if (t.name) { · {{ t.name }} }</p>
+          <button type="button" class="link" (click)="logout()">Salir</button>
+        </div>
+
+        @if (status()?.open) {
+          @if (sent(); as s) {
+            <div class="sent" role="status">
+              <p><b>Recibimos tu pregunta.</b></p>
+              <p>Aparecerá en “Mis preguntas” y en la lista pública cuando el Game Design Team la responda.</p>
+              <button type="button" class="link" (click)="sent.set(null)">Hacer otra pregunta</button>
+            </div>
+          } @else {
+            <form class="ask" (submit)="send($event)" novalidate>
+              <h2 class="panel__t">Hacer una pregunta</h2>
+              <ul class="rules-list">
+                <li>Una sola pregunta por envío.</li>
+                <li>Cita la regla del manual sobre la que preguntas.</li>
+                <li>Pregunta por la regla, no por un diseño o una jugada hipotética.</li>
+              </ul>
+
+              <label class="f">
+                <span>Sección del manual</span>
+                <select [value]="fSection()" (change)="fSection.set($any($event.target).value)">
+                  @for (s of sections; track s.id) { <option [value]="s.id">{{ s.label }}</option> }
+                </select>
+              </label>
+              <label class="f">
+                <span>Reglas relacionadas <small>(opcional, ej. G101, R203)</small></span>
+                <input type="text" [value]="fRules()" (input)="fRules.set($any($event.target).value)" maxlength="60" />
+              </label>
+              <label class="f">
+                <span>Título <small>{{ fTitle().length }}/120</small></span>
+                <input type="text" [value]="fTitle()" (input)="fTitle.set($any($event.target).value); typed()" maxlength="120"
+                       placeholder="Ej. ¿Puede el robot tocar la zona rival en el autónomo?" />
+              </label>
+
+              @if (similar().length) {
+                <div class="similar">
+                  <p class="similar__k">¿Ya está preguntada? Revisa estas antes de enviar:</p>
+                  @for (s of similar(); track s.id) {
+                    <tc-qa-card [item]="s" [compact]="true" (look)="lookFor($event)" />
+                  }
+                </div>
+              }
+
+              <label class="f">
+                <span>Tu pregunta <small [class.over]="fBody().length > 500">{{ fBody().length }}/500</small></span>
+                <textarea rows="6" [value]="fBody()" (input)="fBody.set($any($event.target).value); typed()" maxlength="520"></textarea>
+              </label>
+              <label class="check">
+                <input type="checkbox" [checked]="fChecked()" (change)="fChecked.set($any($event.target).checked)" />
+                <span>Revisé el manual, las actualizaciones y las preguntas parecidas.</span>
+              </label>
+              @if (sendError()) { <p class="err" role="alert">{{ sendError() }}</p> }
+              <button type="submit" class="btn" [disabled]="!canSend()">{{ sending() ? 'Enviando…' : 'Enviar pregunta' }}</button>
+              <p class="fine">Hasta 3 preguntas cada 24 horas por equipo. Todas las preguntas y respuestas son públicas.</p>
+            </form>
+          }
+        } @else {
+          @if (status(); as st) { <p class="closed">El Q&amp;A está cerrado. {{ stateText(st) }}</p> }
+        }
+      </div>
+
+      <div class="panel">
+        <h2 class="panel__t">Mis preguntas</h2>
+        @if (!mine().length) {
+          <p class="muted">Tu equipo todavía no ha enviado preguntas.</p>
+        } @else {
+          <ul class="mine">
+            @for (m of mine(); track m.id) {
+              <li>
+                <span [class]="'tag tag--' + m.status">{{ m.status === 'pending' ? 'En revisión' : m.status === 'answered' ? 'Q' + m.number : 'Q' + m.number + ' · sin respuesta' }}</span>
+                <span class="mine__t">{{ m.title }}</span>
+                @if (m.status !== 'pending') { <button type="button" class="link" (click)="lookFor('Q' + m.number)">Ver respuesta</button> }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    } @else {
+      <form class="panel login" (submit)="login($event)" novalidate>
+        <h2 class="panel__t">Entra con tu equipo para preguntar</h2>
+        <p class="muted">Usa tu número de equipo y el código que te dio TideCrew al registrarte. Para leer las respuestas no necesitas entrar.</p>
+        <label class="f">
+          <span>Número de equipo</span>
+          <input #numberInput type="text" inputmode="numeric" autocomplete="username" [value]="number()" (input)="number.set($any($event.target).value)" />
+        </label>
+        <label class="f">
+          <span>Código</span>
+          <input type="password" autocomplete="current-password" [value]="code()" (input)="code.set($any($event.target).value)" />
+        </label>
+        @if (loginError()) { <p class="err" role="alert">{{ loginError() }}</p> }
+        <button type="submit" class="btn" [disabled]="loginBusy() || !number() || !code()">{{ loginBusy() ? 'Entrando…' : 'Entrar' }}</button>
+        <p class="fine">¿Tu equipo no tiene código? <a routerLink="/game" fragment="registro">Registra tu equipo</a>.</p>
+      </form>
+    }
+  </aside>
+</div>

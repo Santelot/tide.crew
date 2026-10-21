@@ -4,6 +4,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { Ocean } from '../../../shared/ocean/ocean';
 import { Mark } from '../../../shared/mark/mark';
+import { HubNav } from './hub-nav';
 import { MotionService, ScrollTrigger, gsap } from '../../../shared/motion/motion.service';
 import { MILESTONES } from '../landing.content';
 import { CHALLENGE, MILESTONE_LABELS, Material, SECTIONS } from './game.content';
@@ -13,7 +14,7 @@ const pad = (n: number) => String(Math.max(0, n)).padStart(2, '0');
 @Component({
   selector: 'app-game',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, Ocean, Mark],
+  imports: [RouterLink, Ocean, Mark, HubNav],
   templateUrl: './game.html',
   styleUrl: './game.scss',
 })
@@ -122,7 +123,7 @@ export class Game implements AfterViewInit, OnDestroy {
 
   protected go(ev: Event, id: string) {
     ev.preventDefault();
-    this.motion.scrollTo('#' + id, -96);
+    this.motion.scrollTo('#' + id, -84);
   }
 
   protected fmt(iso: string, withDay = false) {

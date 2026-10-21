@@ -1,0 +1,168 @@
+<tc-hub-nav here="admin" />
+
+<header class="top top--slim">
+  <div class="wrap admin-head">
+    <div>
+      <p class="crumb"><a routerLink="/game">TideChallenge</a><span aria-hidden="true">/</span><a routerLink="/game/qa">Q&amp;A</a><span aria-hidden="true">/</span>Panel</p>
+      <h1 class="h1">Game Design Team</h1>
+    </div>
+    @if (qa.admin(); as a) {
+      <div class="admin-who"><span>{{ a.username }}</span><button type="button" class="link link--light" (click)="logout()">Salir</button></div>
+    }
+  </div>
+  @if (qa.admin()) {
+    <nav class="wrap tabs" aria-label="Secciones del panel">
+      <button type="button" [class.on]="tab() === 'pending'" (click)="tab.set('pending')">Por responder <b>{{ pending().length }}</b></button>
+      <button type="button" [class.on]="tab() === 'published'" (click)="tab.set('published')">Publicadas <b>{{ published().length }}</b></button>
+      <button type="button" [class.on]="tab() === 'teams'" (click)="tab.set('teams')">Equipos <b>{{ teams().length }}</b></button>
+      <button type="button" [class.on]="tab() === 'settings'" (click)="tab.set('settings')">Ajustes</button>
+    </nav>
+  }
+</header>
+
+@if (!qa.admin()) {
+  <div class="wrap gate">
+    <form class="panel" (submit)="login($event)" novalidate>
+      <h2 class="panel__t">Acceso del Game Design Team</h2>
+      <label class="f"><span>Usuario</span><input type="text" autocomplete="username" [value]="user()" (input)="user.set($any($event.target).value)" /></label>
+      <label class="f"><span>Contraseña</span><input type="password" autocomplete="current-password" [value]="pass()" (input)="pass.set($any($event.target).value)" /></label>
+      @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+      <button type="submit" class="btn" [disabled]="busy() || !user() || !pass()">{{ busy() ? 'Entrando…' : 'Entrar' }}</button>
+    </form>
+  </div>
+} @else {
+  <div class="wrap admin-body">
+    @if (tab() === 'pending' || tab() === 'published') {
+      @let rows = tab() === 'pending' ? pending() : published();
+      <div class="split">
+        <ul class="queue">
+          @for (q of rows; track q.id) {
+            <li>
+              <button type="button" class="qrow" [class.on]="selId() === q.id" (click)="select(q)">
+                <span class="qrow__top">
+                  @if (q.number) { <b>Q{{ q.number }}</b> } @else { <b class="new">Nueva</b> }
+                  <span>Equipo {{ q.team }}</span><span>{{ label(q.section) }}</span>
+                  @if (q.hidden) { <span class="hid">Oculta</span> }
+                </span>
+                <span class="qrow__t">{{ q.title }}</span>
+                <span class="qrow__d">{{ fmt(q.created_at) }}</span>
+              </button>
+            </li>
+          } @empty {
+            <li class="muted pad">{{ tab() === 'pending' ? 'No hay preguntas por responder.' : 'Todavía no hay preguntas publicadas.' }}</li>
+          }
+        </ul>
+
+        @if (sel(); as q) {
+          <section class="editor">
+            <tc-qa-card [item]="q" />
+
+            @if (similar().length) {
+              <div class="sim">
+                <p class="sim__k">Ya respondidas y parecidas</p>
+                @for (s of similar(); track s.id) {
+                  <div class="sim__row">
+                    <span><b>Q{{ s.number }}</b> {{ s.title }}</span>
+                    <button type="button" class="link" (click)="markDuplicate(s.number!)">Es duplicada de Q{{ s.number }}</button>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="panel">
+              <h3 class="panel__t">{{ q.status === 'pending' ? 'Responder' : 'Editar respuesta' }}</h3>
+              <div class="tpl">
+                <span>Plantillas:</span>
+                @for (t of templates; track t.id) { <button type="button" (click)="useTemplate(t.text)">{{ t.label }}</button> }
+              </div>
+              <label class="f">
+                <span>Respuesta oficial</span>
+                <textarea rows="7" [value]="aText()" (input)="aText.set($any($event.target).value)"></textarea>
+              </label>
+              <label class="f">
+                <span>Reglas citadas en la respuesta <small>(ej. G101, R203)</small></span>
+                <input type="text" [value]="aRules()" (input)="aRules.set($any($event.target).value)" />
+              </label>
+              @if (aDup()) { <p class="muted">Se marcará como duplicada de <b>Q{{ aDup() }}</b>. <button type="button" class="link" (click)="aDup.set(null)">Quitar</button></p> }
+              <div class="actions">
+                <button type="button" class="btn btn--inline" [disabled]="saving() || aText().trim().length < 2" (click)="publish('answered')">
+                  {{ q.status === 'pending' ? 'Publicar respuesta' : 'Guardar cambios' }}
+                </button>
+                <button type="button" class="btn btn--inline btn--ghost" [disabled]="saving() || aText().trim().length < 2" (click)="publish('declined')">Publicar sin respuesta oficial</button>
+                @if (q.status !== 'pending') {
+                  <button type="button" class="link" (click)="toggleHidden(q)">{{ q.hidden ? 'Mostrar en la lista pública' : 'Ocultar de la lista pública' }}</button>
+                }
+              </div>
+              @if (flash()) { <p class="flash" role="status">{{ flash() }}</p> }
+            </div>
+          </section>
+        } @else {
+          <section class="editor"><p class="muted pad">Elige una pregunta de la lista.</p></section>
+        }
+      </div>
+    }
+
+    @if (tab() === 'teams') {
+      <div class="split split--teams">
+        <form class="panel" (submit)="addTeam($event)" novalidate>
+          <h3 class="panel__t">Registrar equipo</h3>
+          <p class="muted">El código se muestra una sola vez: cópialo y envíaselo al equipo. Si lo pierden, genera uno nuevo.</p>
+          <label class="f"><span>Número de equipo</span><input type="text" inputmode="numeric" [value]="tNumber()" (input)="tNumber.set($any($event.target).value)" /></label>
+          <label class="f"><span>Nombre <small>(opcional)</small></span><input type="text" [value]="tName()" (input)="tName.set($any($event.target).value)" /></label>
+          <label class="f"><span>Código <small>(vacío = generar uno seguro)</small></span><input type="text" [value]="tCode()" (input)="tCode.set($any($event.target).value)" /></label>
+          @if (error()) { <p class="err" role="alert">{{ error() }}</p> }
+          <button type="submit" class="btn" [disabled]="!tNumber()">Registrar</button>
+          @if (issued(); as i) {
+            <div class="issued" role="status">
+              <p>Equipo <b>{{ i.number }}</b> · código</p>
+              <code>{{ i.code }}</code>
+              <button type="button" class="link" (click)="copy('Equipo ' + i.number + ' · Código ' + i.code)">Copiar</button>
+            </div>
+          }
+        </form>
+
+        <div class="panel">
+          <h3 class="panel__t">Equipos registrados</h3>
+          <table class="tbl">
+            <thead><tr><th>Equipo</th><th>Preguntas</th><th>Última entrada</th><th></th></tr></thead>
+            <tbody>
+              @for (t of teams(); track t.number) {
+                <tr [class.off]="!t.active">
+                  <td><b>{{ t.number }}</b>@if (t.name) { <span class="muted"> · {{ t.name }}</span> }</td>
+                  <td>{{ t.questions }}</td>
+                  <td>{{ fmt(t.last_login) }}</td>
+                  <td class="row-act">
+                    <button type="button" class="link" (click)="newCode(t)">Nuevo código</button>
+                    <button type="button" class="link" (click)="toggleTeam(t)">{{ t.active ? 'Desactivar' : 'Activar' }}</button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="muted">Sin equipos todavía.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (tab() === 'settings') {
+      <div class="panel settings">
+        <h3 class="panel__t">Estado del Q&amp;A</h3>
+        @if (status(); as st) {
+          <p class="muted">Ahora mismo está <b>{{ st.open ? 'abierto' : 'cerrado' }}</b>. Calendario: del {{ fmt(st.opens_at) }} al {{ fmt(st.closes_at) }}.</p>
+          <div class="modes" role="radiogroup" aria-label="Modo del Q&A">
+            <button type="button" role="radio" [attr.aria-checked]="st.mode === 'auto'" [class.on]="st.mode === 'auto'" (click)="setMode('auto')">
+              <b>Automático</b><span>Abre y cierra solo según el calendario.</span>
+            </button>
+            <button type="button" role="radio" [attr.aria-checked]="st.mode === 'open'" [class.on]="st.mode === 'open'" (click)="setMode('open')">
+              <b>Abierto</b><span>Recibe preguntas sin importar la fecha (útil para pruebas).</span>
+            </button>
+            <button type="button" role="radio" [attr.aria-checked]="st.mode === 'closed'" [class.on]="st.mode === 'closed'" (click)="setMode('closed')">
+              <b>Cerrado</b><span>Nadie puede preguntar; las respuestas siguen públicas.</span>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

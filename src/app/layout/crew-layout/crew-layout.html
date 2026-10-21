@@ -6,6 +6,7 @@
 
 <a class="skiplink" href="#contenido">{{ langSvc.lang() === 'es' ? 'Saltar al contenido' : 'Skip to content' }}</a>
 
+@if (!hub()) {
 <header [class]="'nav tone-' + tone()"
         [class.is-hidden]="hidden()" [class.is-scrolled]="scrolled()" [class.is-open]="menu()">
   <a class="brand" href="/FIRST" (click)="go($event, 'top')" aria-label="TideCrew">
@@ -46,6 +47,7 @@
   </nav>
   <tc-mark class="menu__mark" tone="white" />
 </div>
+}
 
 <main id="contenido"><router-outlet /></main>
 

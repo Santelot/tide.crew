@@ -49,12 +49,15 @@ export class CrewLayout implements OnInit, OnDestroy {
   protected readonly hidden = signal(false);
   protected readonly scrolled = signal(false);
   protected readonly menu = signal(false);
+  /** The TideChallenge hub (/game…) brings its own navigation. */
+  protected readonly hub = signal(location.pathname.startsWith('/game'));
 
   private raf = 0;
   private lastY = 0;
   private sub = this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
     this.menu.set(false);
     this.motion.lock(false);
+    this.hub.set((e as NavigationEnd).urlAfterRedirects.startsWith('/game'));
     // Every new page starts at the top. Smooth scrolling keeps its own idea of the
     // scroll position, so without this a new page could open wherever the last one was.
     if (!(e as NavigationEnd).urlAfterRedirects.includes('#')) {
