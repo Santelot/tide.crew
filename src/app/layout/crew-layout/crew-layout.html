@@ -1,0 +1,88 @@
+@if (loader()) {
+  <tc-loader [text]="c().loader.text" [skip]="c().loader.skip" (leaving)="loaderLeaving()" (done)="loader.set(false)" />
+}
+
+<a class="skiplink" href="#contenido">{{ langSvc.lang() === 'es' ? 'Saltar al contenido' : 'Skip to content' }}</a>
+
+<header [class]="'nav tone-' + tone()"
+        [class.is-hidden]="hidden()" [class.is-scrolled]="scrolled()" [class.is-open]="menu()">
+  <a class="brand" href="/FIRST" (click)="go($event, 'top')" aria-label="TideCrew">
+    <img class="lockup lockup--day" src="/brand/lockup-h-dark.svg" alt="TideCrew" width="170" height="51" />
+    <img class="lockup lockup--deep" src="/brand/lockup-h-white.svg" alt="" aria-hidden="true" width="170" height="51" />
+  </a>
+
+  <nav class="links" aria-label="Principal">
+    @for (l of links(); track l.id) {
+      <a [href]="'/FIRST#' + l.id" (click)="go($event, l.id)" [class.on]="sections.active() === l.id"
+         [attr.aria-current]="sections.active() === l.id ? 'true' : null">{{ l.label }}</a>
+    }
+  </nav>
+
+  <div class="actions">
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" [class.on]="langSvc.lang() === 'es'" [attr.aria-pressed]="langSvc.lang() === 'es'" (click)="setLang('es')">ES</button>
+      <button type="button" [class.on]="langSvc.lang() === 'en'" [attr.aria-pressed]="langSvc.lang() === 'en'" (click)="setLang('en')">EN</button>
+    </div>
+    <a class="cta" href="/FIRST#unete" (click)="go($event, 'unete')">{{ c().nav.join }}</a>
+    <button type="button" class="burger" [attr.aria-expanded]="menu()" aria-controls="menu" (click)="toggleMenu()">
+      <span class="sr">{{ menu() ? c().nav.close : c().nav.menu }}</span>
+      <i></i><i></i>
+    </button>
+  </div>
+</header>
+
+<div id="menu" class="menu" [class.is-open]="menu()" [attr.aria-hidden]="!menu()" [attr.inert]="menu() ? null : ''">
+  <nav aria-label="Menú">
+    @for (l of links(); track l.id) {
+      <a [href]="'/FIRST#' + l.id" (click)="go($event, l.id)">{{ l.label }}</a>
+    }
+    <a href="/FIRST#unete" (click)="go($event, 'unete')">{{ c().nav.join }}</a>
+  </nav>
+  <tc-mark class="menu__mark" tone="white" />
+</div>
+
+<main id="contenido"><router-outlet /></main>
+
+<footer class="foot" data-tone="dark">
+  <svg class="foot__waves" viewBox="0 0 2880 100" preserveAspectRatio="none" aria-hidden="true">
+    <g class="fw fw--back"><path d="M0 58 C 120 45 240 45 360 58 C 480 71 600 71 720 58 C 840 45 960 45 1080 58 C 1200 71 1320 71 1440 58 C 1560 45 1680 45 1800 58 C 1920 71 2040 71 2160 58 C 2280 45 2400 45 2520 58 C 2640 71 2760 71 2880 58 L 2880 0 L 0 0 Z"/></g>
+    <g class="fw fw--mid"><path d="M0 44 C 120 64 240 64 360 44 C 480 24 600 24 720 44 C 840 64 960 64 1080 44 C 1200 24 1320 24 1440 44 C 1560 64 1680 64 1800 44 C 1920 24 2040 24 2160 44 C 2280 64 2400 64 2520 44 C 2640 24 2760 24 2880 44 L 2880 0 L 0 0 Z"/></g>
+  </svg>
+
+  <div class="foot__inner">
+    <div class="foot__promise">
+      <tc-mark class="foot__mark" tone="color" />
+      <p class="foot__anthem">The tide always rises.<br />So do we.</p>
+      <tc-wake width="min(320px, 70vw)" [animate]="false" style="--wake-color: #FFFBFE; --tk: 8px" />
+    </div>
+
+    <div class="foot__grid">
+      <img class="foot__lockup" src="/brand/lockup-v-white.svg" alt="TideCrew" width="150" height="132" loading="lazy" />
+      <nav class="foot__links" aria-label="Pie de página">
+        @for (l of links(); track l.id) {
+          <a [href]="'/FIRST#' + l.id" (click)="go($event, l.id)">{{ l.label }}</a>
+        }
+        <a href="/FIRST#unete" (click)="go($event, 'unete')">{{ c().nav.join }}</a>
+      </nav>
+      <div class="foot__col">
+        <p class="foot__h">{{ c().footer.coaches }}</p>
+        @for (p of coaches; track p.name) {
+          <p class="foot__person"><strong>{{ p.name }}</strong><span>{{ p.role[langSvc.lang()] }}</span></p>
+        }
+      </div>
+      <div class="foot__col">
+        <p class="foot__h">{{ c().footer.contact }}</p>
+        <a [href]="'mailto:' + email">{{ email }}</a>
+        <p class="foot__h foot__h--gap">{{ c().footer.follow }}</p>
+        @for (s of social; track s.id) {
+          <a [href]="s.href" target="_blank" rel="noopener">{{ s.label }} · {{ s.handle }}</a>
+        }
+      </div>
+    </div>
+
+    <div class="foot__base">
+      <span>© {{ year }} TideCrew · {{ c().footer.line }}</span>
+      <button type="button" class="totop" (click)="toTop()">{{ c().footer.top }} <span aria-hidden="true">↑</span></button>
+    </div>
+  </div>
+</footer>

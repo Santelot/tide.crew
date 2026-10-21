@@ -1,9 +1,7 @@
-<tc-tide mode="low" />
-
-<header class="head">
+<header class="head" data-tone="light">
   <p class="crumb"><a routerLink="/FIRST">TideCrew</a> / Materiales de temporada</p>
   <h1 class="anthem">{{ c.name }}</h1>
-  <tc-wake [play]="true" width="min(300px, 64vw)" />
+  <tc-wake [play]="true" width="min(300px, 64vw)" style="--tk: 8px; color: var(--tc-pacific)" />
   <p class="summary">{{ c.summary }}</p>
 
   <dl class="facts">
@@ -22,7 +20,7 @@
   </ol>
 </header>
 
-<div class="hub">
+<div class="hub" data-tone="light">
   <nav class="index" aria-label="Secciones de materiales">
     <ul>
       @for (s of sections; track s.id) {

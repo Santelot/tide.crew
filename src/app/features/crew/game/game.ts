@@ -2,7 +2,6 @@ import {
   AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Tide } from '../../../shared/tide/tide';
 import { Wake } from '../../../shared/wake/wake';
 import { CHALLENGE, KEY_DATES, Material, SECTIONS } from './game.content';
 
@@ -11,7 +10,7 @@ const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', '
 @Component({
   selector: 'app-game',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, Tide, Wake],
+  imports: [RouterLink, Wake],
   templateUrl: './game.html',
   styleUrl: './game.scss',
 })

@@ -23,9 +23,9 @@
   --tc-radius-pill:  999px;
 
   /* Type — English anthem in display, Spanish conversation in body */
-  --tc-font-display:   'Gate', 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  --tc-font-title:     'Boldena', 'Archivo', system-ui, sans-serif;
-  --tc-font-editorial: 'Elms Sans', system-ui, sans-serif;
+  --tc-font-display:   'Gate', 'Arial Narrow', sans-serif;
+  --tc-font-title:     'Boldena', system-ui, sans-serif;
+  --tc-font-editorial: 'Elms Sans', 'Roboto', system-ui, sans-serif;
   --tc-font-body:      'Roboto', system-ui, sans-serif;
 
   /* Surfaces */
@@ -55,14 +55,13 @@ a { color: inherit; }
 .page__note { color: color-mix(in srgb, var(--tc-ink) 65%, transparent); }
 code { font-family: ui-monospace, monospace; color: var(--tc-crest); }
 
-/* Brand fonts — drop the licensed files into public/fonts/ with these exact names
-   (they come from TideCrew_Design_System.zip). Until then the stand-ins load. */
-@font-face { font-family: 'Gate'; font-style: normal; src: local('Gate'), url('/fonts/gate-regular.otf') format('opentype'); font-display: swap; }
-@font-face { font-family: 'Gate'; font-style: italic; src: local('Gate Italic'), url('/fonts/gate-italic.otf') format('opentype'); font-display: swap; }
-@font-face { font-family: 'Boldena'; font-weight: 400 900; src: local('Boldena'), url('/fonts/boldenabold-vgjmz.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Elms Sans'; font-weight: 100 900; src: url('/fonts/ElmsSans-VariableFont_wght.ttf') format('truetype'); font-display: swap; }
+/* Brand fonts — licensed faces, subset to Latin and served from /fonts. */
+@font-face { font-family: 'Gate'; font-style: normal; font-weight: 400; src: url('/fonts/gate-regular.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Gate'; font-style: italic; font-weight: 400; src: url('/fonts/gate-italic.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Boldena'; font-weight: 400 900; src: url('/fonts/boldena.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Elms Sans'; font-weight: 100 900; src: url('/fonts/elms-sans.woff2') format('woff2'); font-display: swap; }
 
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
 ::selection { background: var(--tc-crest); color: var(--tc-night); }
-body { overflow-x: hidden; }

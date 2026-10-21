@@ -1,96 +1,380 @@
-<tc-tide mode="rise" />
-
-<!-- HERO ─ one Gate line, one orchestrated entrance -->
-<section class="hero" [class.is-in]="entered()">
-  <div class="hero__copy">
-    <p class="kicker">{{ hero.kicker }}</p>
-    <h1 class="anthem">
-      <span class="anthem__mask"><span class="anthem__text">Ride the Tide</span></span>
-    </h1>
-    <tc-wake class="hero__wake" [play]="entered()" width="min(340px, 70vw)" style="--d: 520ms" />
-    <p class="intro">{{ hero.intro }}</p>
-    <div class="actions">
-      <a routerLink="/game" class="btn">Conoce TideChallenge</a>
-      <a routerLink="/FIRST" fragment="patrocina" class="btn btn--ghost">Patrocina una temporada</a>
-    </div>
-  </div>
-
-  @if (lead) {
-    <a class="hero__team" [href]="contact.tba" target="_blank" rel="noopener"
-       [attr.aria-label]="'Equipo ' + lead.number + ', ' + lead.name + ', en The Blue Alliance'">
-      <span class="hero__num">{{ lead.number }}</span>
-      <span class="hero__name">{{ lead.name }}</span>
-      <span class="hero__prog">{{ lead.program }}</span>
-    </a>
-  }
-</section>
-
-<!-- LA TRIPULACIÓN -->
-<section id="tripulacion" class="block crew">
-  <div class="crew__text">
-    <h2 class="title">{{ crew.title }}</h2>
-    <p class="body">{{ crew.body }}</p>
-  </div>
-
-  <ul class="manifest" aria-label="Equipos de la tripulación">
-    @for (t of teams; track t.number) {
-      <li class="manifest__row">
-        <span class="manifest__num">{{ t.number }}</span>
-        <span class="manifest__who">
-          <strong>{{ t.name }}</strong>
-          <span>{{ t.program }}</span>
-          <span class="muted">{{ t.home }}</span>
-        </span>
+<!-- ═══ DEPTH RAIL — where you are, one click to anywhere ═══════════════ -->
+<nav class="rail" [class.is-on]="railOn()" [attr.data-on]="railTone()" [attr.aria-label]="c().nav.sections">
+  <span class="rail__depth" aria-hidden="true"><b>{{ depth() }}</b> m</span>
+  <ol>
+    @for (s of rail(); track s.id) {
+      <li>
+        <a [href]="'/FIRST#' + s.id" (click)="jump($event, s.id)" [class.on]="sections.active() === s.id"
+           [attr.aria-current]="sections.active() === s.id ? 'true' : null">
+          <span class="rail__label">{{ s.label }}</span><span class="rail__dot" aria-hidden="true"></span>
+        </a>
       </li>
     }
-  </ul>
+  </ol>
+</nav>
+
+<!-- ═══ HERO — daylight; the tide rises as you scroll ════════════════════ -->
+<section id="top" class="hero" data-tone="light" #hero>
+  <div class="hero__stage" #stage (pointermove)="onPointer($event)" (pointerdown)="onPointer($event, true)">
+    <tc-water class="hero__water" />
+
+    <!-- The mark's own shadow, falling into the water beneath it. -->
+    <div class="hero__shadow" #shadow aria-hidden="true"><tc-mark tone="night" label="" /></div>
+
+    <div class="hero__copy" #copy>
+      <p class="kicker" data-in>{{ c().hero.kicker }}</p>
+      <h1 class="anthem" [class.is-filled]="entered()" aria-label="TideCrew. More than robots.">
+        <span class="anthem__mask" aria-hidden="true"><span class="anthem__w" data-word>More</span></span>
+        <span class="anthem__mask" aria-hidden="true"><span class="anthem__w" data-word>than</span></span>
+        <span class="anthem__mask anthem__mask--br" aria-hidden="true"><span class="anthem__w anthem__w--x" data-word>robots.</span></span>
+      </h1>
+      <tc-wake class="hero__wake" [play]="entered()" width="clamp(180px, 22vw, 320px)" style="--d: 650ms; --tk: 8px; color: var(--tc-pacific)" />
+      <p class="lead" data-in>{{ c().hero.lead }}</p>
+      <div class="ctas" data-in>
+        <a class="btn btn--pacific" href="/FIRST#equipos" (click)="jump($event, 'equipos')">{{ c().hero.ctaTeams }}</a>
+        <a class="btn btn--line" href="/FIRST#unete" (click)="jump($event, 'unete')">{{ c().hero.ctaJoin }}</a>
+      </div>
+    </div>
+
+    <div class="hero__mark" #markWrap><tc-mark class="hero__mk" tone="color" /></div>
+
+    <div class="hero__cue" #cue>
+      <span class="cue__line" aria-hidden="true"><i></i></span>
+      <span>{{ c().hero.scroll }}</span>
+      <span class="cue__touch">· {{ c().hero.touch }}</span>
+    </div>
+  </div>
 </section>
 
-<!-- VALORES ─ they light up as the water passes them -->
-<section class="block beliefs" aria-labelledby="beliefs-title">
-  <h2 id="beliefs-title" class="title">En lo que creemos</h2>
-  <ul class="values">
-    @for (v of values; track v) {
-      <li #val class="value">{{ v }}</li>
+<!-- ═══ QUÉ ES TIDECREW — underwater, Pacific ═══════════════════════════ -->
+<section id="tidecrew" class="about" data-tone="pacific" data-section>
+  <div class="bubbles" aria-hidden="true">
+    @for (b of bubbles; track $index) {
+      <i [style.left.%]="b.x" [style.width.px]="b.r" [style.height.px]="b.r" [style.animation-duration.s]="b.d" [style.animation-delay.s]="b.delay"></i>
     }
-  </ul>
+  </div>
+  <div class="wrap">
+    <p class="more more--foam" data-more>{{ c().more }} <s>{{ c().about.more }}<i aria-hidden="true"></i></s></p>
+    <h2 class="title title--foam" data-reveal>{{ c().about.title }}</h2>
+
+    <p class="statement" #statement>
+      @for (w of words(); track $index) {<span class="sw">{{ w }} </span>}
+    </p>
+
+    <dl class="stats">
+      @for (s of c().about.stats; track $index) {
+        <div class="stat" data-reveal>
+          <dt class="stat__n"><span class="stat__v" [attr.data-to]="s.count ? s.value : null">{{ s.value }}</span></dt>
+          <dd>{{ s.label }}</dd>
+        </div>
+      }
+    </dl>
+
+    <div class="about__grid">
+      <article class="card card--shared" data-reveal>
+        <h3 class="card__t">{{ c().about.sharedTitle }}</h3>
+        <ul class="chips">
+          @for (s of c().about.shared; track s; let i = $index) { <li [style.--i]="i">{{ s }}</li> }
+        </ul>
+      </article>
+      <article class="card" data-reveal>
+        <h3 class="card__t">{{ c().about.originTitle }}</h3>
+        <p class="card__p">{{ c().about.origin }}</p>
+      </article>
+      <article class="card card--schools" data-reveal>
+        <h3 class="card__t">{{ c().about.schoolsTitle }}</h3>
+        <ul class="schools">
+          @for (s of c().about.schools; track s.name) {
+            <li><strong>{{ s.name }}</strong><span>{{ s.where }} · {{ s.note }}</span></li>
+          }
+        </ul>
+      </article>
+      <article class="card card--coaches" data-reveal>
+        <h3 class="card__t">{{ c().about.coachesTitle }}</h3>
+        <ul class="coaches">
+          @for (p of coaches; track p.name) {
+            <li><span class="coach__init" aria-hidden="true">{{ initials(p.name) }}</span><span><strong>{{ p.name }}</strong><em>{{ p.role[lang()] }}</em></span></li>
+          }
+        </ul>
+      </article>
+    </div>
+  </div>
 </section>
 
-<!-- OFFSEASON → TideChallenge -->
-<section id="temporada" class="block season">
-  <div class="season__text">
-    <h2 class="title">{{ season.title }}</h2>
-    <p class="body">{{ season.body }}</p>
+<!-- ═══ FIRST — surfacing into daylight ═════════════════════════════════ -->
+<section id="first" class="first" data-tone="light" data-section>
+  <svg class="surface" viewBox="0 0 2880 120" preserveAspectRatio="none" aria-hidden="true">
+    <path class="surface__back" d="M0 70 C 240 30 480 30 720 70 C 960 110 1200 110 1440 70 C 1680 30 1920 30 2160 70 C 2400 110 2640 110 2880 70 L 2880 120 L 0 120 Z" />
+    <path class="surface__front" d="M0 80 C 180 50 360 50 540 80 C 720 110 900 110 1080 80 C 1260 50 1440 50 1620 80 C 1800 110 1980 110 2160 80 C 2340 50 2520 50 2700 80 C 2790 95 2835 98 2880 96 L 2880 120 L 0 120 Z" />
+  </svg>
+  <div class="wrap">
+    <div class="first__head">
+      <div>
+        <p class="more" data-more>{{ c().more }} <s>{{ c().first.more }}<i aria-hidden="true"></i></s></p>
+        <h2 class="title" data-reveal>{{ c().first.title }}</h2>
+      </div>
+      <p class="body" data-reveal>{{ c().first.body }}</p>
+    </div>
+
+    <ol class="pillars">
+      @for (p of c().first.pillars; track $index; let i = $index) {
+        <li class="pillar" [class.pillar--key]="i === 2" data-reveal>
+          <span class="pillar__n">0{{ i + 1 }}</span>
+          <h3>{{ p.title }}</h3>
+          <p>{{ p.body }}</p>
+        </li>
+      }
+    </ol>
+
+    <div class="ladder-head">
+      <h3 class="subtitle" data-reveal>{{ c().first.ladderTitle }}</h3>
+      <p class="hint" aria-hidden="true">{{ c().first.ladderHint }}</p>
+    </div>
+    <ol class="ladder" #ladderList>
+      @for (l of ladder; track l.program; let i = $index) {
+        <li class="lvl" [style.--lv]="i + 1" [class.is-hot]="hotLevel() === i"
+            (pointerenter)="hotLevel.set(i)" (pointerleave)="hotLevel.set(-1)" (focusin)="hotLevel.set(i)" (focusout)="hotLevel.set(-1)" tabindex="0">
+          <span class="lvl__water" aria-hidden="true">
+            <svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 20 C 50 0 100 0 150 20 C 200 40 250 40 300 20 C 350 0 375 5 400 12 L 400 40 L 0 40 Z" /></svg>
+          </span>
+          <span class="lvl__depth">{{ c().first.depth[i] }}</span>
+          <span class="lvl__prog">{{ l.program }}</span>
+          <span class="lvl__long">{{ l.long }}</span>
+          <span class="lvl__ages">{{ c().first.levels[l.program].ages }}</span>
+          <p class="lvl__body">{{ c().first.levels[l.program].body }}</p>
+          <ul class="lvl__teams">
+            @for (id of l.teams; track id) {
+              <li>
+                <a [href]="'/FIRST#equipos'" (click)="openTeam($event, id)">
+                  <img [src]="team(id).logo" alt="" width="34" height="34" loading="lazy" />
+                  <span>{{ team(id).name }}@if (team(id).number) { <small>{{ team(id).number }}</small> } @else { <small>×4</small> }</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </li>
+      }
+    </ol>
+    <p class="path" data-reveal><span class="path__arrow" aria-hidden="true"></span>{{ c().first.path }}</p>
   </div>
-  <a routerLink="/game" class="challenge">
-    <span class="challenge__name">TideChallenge</span>
-    <span class="challenge__desc">Manual, campo, actualizaciones y preguntas: todos los materiales del reto en un solo lugar.</span>
-    <span class="challenge__go">{{ season.cta }}</span>
-  </a>
 </section>
 
-<!-- PATROCINIO -->
-<section id="patrocina" class="block sponsor">
-  <div class="sponsor__text">
-    <h2 class="title">{{ sponsorText.title }}</h2>
-    <p class="body">{{ sponsorText.body }}</p>
-    <a class="btn" [href]="mailto">{{ sponsorText.cta }}</a>
-  </div>
+<!-- ═══ EQUIPOS — the fleet ═════════════════════════════════════════════ -->
+<section id="equipos" class="teams" data-tone="light" data-section>
+  <div class="wrap">
+    <div class="first__head">
+      <div>
+        <p class="more" data-more>{{ c().more }} <s>{{ c().teams.more }}<i aria-hidden="true"></i></s></p>
+        <h2 class="title" data-reveal>{{ c().teams.title }}</h2>
+      </div>
+      <p class="body" data-reveal>{{ c().teams.body }}</p>
+    </div>
 
-  @if (sponsors.length) {
-    <ul class="wall">
-      @for (s of sponsors; track s.name) {
-        <li class="wall__item" [attr.data-tier]="s.tier">
-          <a [href]="s.url || null" target="_blank" rel="noopener">
-            @if (s.logo) { <img [src]="s.logo" [alt]="s.name" loading="lazy" /> } @else { {{ s.name }} }
-          </a>
+    <div class="fleet" data-reveal>
+      <div class="fleet__tabs" role="tablist" [attr.aria-label]="c().nav.teams" (keydown)="tabKeys($event, sel(), teams.length, pick)">
+        @for (t of teams; track t.id; let i = $index) {
+          <button type="button" role="tab" class="ftab" [id]="'tab-' + t.id" [style.--team]="t.color"
+                  [attr.aria-selected]="sel() === i" [attr.aria-controls]="'panel-team'" [tabindex]="sel() === i ? 0 : -1"
+                  (click)="pick(i)">
+            <img [src]="t.logo" alt="" width="44" height="44" />
+            <span class="ftab__name">{{ t.name }}</span>
+            <span class="ftab__meta">{{ t.program }}@if (t.number) { · {{ t.number }} }</span>
+          </button>
+        }
+      </div>
+
+      <article class="panel" id="panel-team" role="tabpanel" [attr.aria-labelledby]="'tab-' + cur().id"
+               [style.--team]="cur().color" [style.--team-ink]="cur().ink" #panel>
+        <div class="panel__sea" aria-hidden="true">
+          <span class="panel__water" #panelWater>
+            <svg class="pw pw--back" viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 22 C 100 4 200 4 300 22 C 400 40 500 40 600 22 C 700 4 750 8 800 14 L 800 40 L 0 40 Z" /></svg>
+            <svg class="pw pw--front" viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 18 C 100 36 200 36 300 18 C 400 0 500 0 600 18 C 700 36 750 32 800 26 L 800 40 L 0 40 Z" /></svg>
+          </span>
+          <span class="panel__float"><img class="panel__logo" #panelLogo [src]="cur().logo" [alt]="cur().name" width="320" height="320" /></span>
+          <span class="panel__num">{{ cur().number ?? cur().program }}</span>
+        </div>
+        <div class="panel__info" #panelInfo>
+          <p class="panel__prog">{{ cur().program }} · {{ c().teams.labels.since }} {{ cur().since }}</p>
+          <h3 class="panel__name">{{ cur().name }}</h3>
+          <p class="panel__tag">{{ detail().tagline }}</p>
+          <p class="panel__body">{{ detail().body }}</p>
+          <dl class="panel__facts">
+            <div><dt>{{ c().teams.labels.number }}</dt><dd>{{ cur().number ?? c().teams.noNumber }}</dd></div>
+            <div><dt>{{ c().teams.labels.home }}</dt><dd>{{ detail().home }}</dd></div>
+            @if (detail().highlight) { <div class="wide"><dt>{{ c().teams.labels.highlight }}</dt><dd>{{ detail().highlight }}</dd></div> }
+          </dl>
+          @if (cur().squads; as squads) {
+            <ul class="squads" [attr.aria-label]="c().teams.labels.squads">
+              @for (s of squads; track s.name) {
+                <li [style.--sq]="s.color" [class.is-wip]="s.wip"><i aria-hidden="true"></i>{{ s.name }} Dragonflies@if (s.wip) { <small>{{ c().teams.labels.wip }}</small> }</li>
+              }
+            </ul>
+          }
+          @if (cur().stats) {
+            <a class="link" [href]="cur().stats" target="_blank" rel="noopener">{{ c().teams.labels.stats }} <span aria-hidden="true">↗</span></a>
+          }
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRAYECTORIA — the tide line fills as you read ═══════════════════ -->
+<section id="trayectoria" class="history" data-tone="light" data-section>
+  <div class="wrap">
+    <div class="first__head">
+      <div>
+        <p class="more" data-more>{{ c().more }} <s>{{ c().history.more }}<i aria-hidden="true"></i></s></p>
+        <h2 class="title" data-reveal>{{ c().history.title }}</h2>
+      </div>
+      <p class="body" data-reveal>{{ c().history.body }}</p>
+    </div>
+
+    <div class="tl" #tl>
+      <div class="tl__aside" aria-hidden="true">
+        <div class="tl__sticky">
+          @for (y of [activeSeason()]; track y) {
+            <span class="tl__big">{{ seasons[y].year }}</span>
+            @if (seasons[y].robot) { <span class="tl__robot">{{ seasons[y].robot }}</span> }
+          }
+        </div>
+      </div>
+      <div class="tl__main">
+      <span class="tl__rail" aria-hidden="true"><span class="tl__fill" #tlFill></span></span>
+      <ol class="tl__list">
+        @for (s of seasons; track s.year; let i = $index) {
+          <li class="yr" [class.yr--big]="s.big" [class.is-on]="activeSeason() >= i" data-season [attr.data-i]="i">
+            <span class="yr__dot" aria-hidden="true"></span>
+            <h3 class="yr__head">
+              <span class="yr__y">{{ s.year }}</span>
+              @if (s.game) { <span class="yr__g">{{ s.game }}</span> }
+              @if (s.robot) { <span class="yr__r">{{ c().history.robot }}: {{ s.robot }}</span> }
+            </h3>
+            <ul class="yr__items">
+              @for (it of s.items; track $index) {
+                <li [style.--dot]="dotColor(it.team)">{{ it[lang()] }}</li>
+              }
+            </ul>
+          </li>
+        }
+      </ol>
+      </div>
+    </div>
+    <p class="tl__note" data-reveal><img src="/teams/dragonflies.svg" alt="" width="40" height="40" loading="lazy" />{{ c().history.note }}</p>
+  </div>
+</section>
+
+<!-- ═══ IMPACTO — into the deep ═════════════════════════════════════════ -->
+<section id="impacto" class="impact" data-tone="dark" data-section>
+  <div class="bubbles bubbles--deep" aria-hidden="true">
+    @for (b of bubbles; track $index) {
+      <i [style.left.%]="b.x" [style.width.px]="b.r" [style.height.px]="b.r" [style.animation-duration.s]="b.d * 1.3" [style.animation-delay.s]="b.delay"></i>
+    }
+  </div>
+  <div class="wrap">
+    <p class="more more--deep" data-more>{{ c().more }} <s>{{ c().impact.more }}<i aria-hidden="true"></i></s></p>
+    <h2 class="title title--foam" data-reveal>{{ c().impact.title }}</h2>
+
+    <div class="award" data-reveal>
+      <p class="award__lead">{{ c().impact.lead }}</p>
+      <div class="award__badge">
+        <svg class="award__ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="54" pathLength="1" />
+        </svg>
+        <tc-mark class="award__mk" tone="white" label="" />
+        <p><strong>{{ c().impact.award }}</strong><span>{{ c().impact.awardWhere }}</span></p>
+      </div>
+    </div>
+
+    <ul class="progs">
+      @for (p of c().impact.programs; track p.name; let i = $index) {
+        <li class="prog" data-reveal (pointermove)="ripple($event)" (pointerenter)="ripple($event)">
+          <span class="prog__n" aria-hidden="true">0{{ i + 1 }}</span>
+          <h3>{{ p.name }}</h3>
+          <p>{{ p.body }}</p>
         </li>
       }
     </ul>
-  } @else {
-    <a class="wall wall--empty" [href]="mailto">
-      <span>{{ sponsorText.empty }}</span>
-      <span class="wall__slot">Tu marca aquí</span>
-    </a>
-  }
+  </div>
+</section>
+
+<!-- ═══ TIDECHALLENGE ═══════════════════════════════════════════════════ -->
+<section id="tidechallenge" class="challenge" data-tone="pacific" data-section #challenge>
+  <div class="wrap">
+    <p class="more more--foam" data-more>{{ c().more }} <s>{{ c().challenge.more }}<i aria-hidden="true"></i></s></p>
+  </div>
+  <h2 class="challenge__name" #challengeName>TideChallenge</h2>
+  <div class="wrap challenge__grid">
+    <div class="challenge__intro">
+      <p class="challenge__season">{{ c().challenge.season }}</p>
+      <p class="challenge__body">{{ c().challenge.body }}</p>
+      <a class="btn btn--foam" routerLink="/game">{{ c().challenge.cta }}</a>
+    </div>
+
+    <div class="clock" data-reveal>
+      @if (nextMilestone(); as m) {
+        <p class="clock__label">{{ c().challenge.next }} · <strong>{{ c().challenge.milestones[m.id] }}</strong></p>
+        <div class="clock__digits" role="timer" aria-live="off">
+          @for (u of countdown(); track $index; let i = $index) {
+            <span class="digit"><b>{{ u }}</b><small>{{ c().challenge.units[i] }}</small></span>
+          }
+        </div>
+      } @else {
+        <p class="clock__label">{{ c().challenge.over }}</p>
+      }
+      <ol class="ms">
+        @for (m of milestones(); track m.id) {
+          <li [class.is-done]="m.state === 'done'" [class.is-next]="m.state === 'next'">
+            <span class="ms__date">{{ fmtDate(m.at) }}</span>
+            <span class="ms__what">{{ c().challenge.milestones[m.id] }}</span>
+            <span class="ms__state">{{ m.state === 'done' ? c().challenge.done : m.state === 'next' ? c().challenge.now : c().challenge.upcoming }}</span>
+          </li>
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ÚNETE ═══════════════════════════════════════════════════════════ -->
+<section id="unete" class="join" data-tone="light" data-section>
+  <div class="wrap">
+    <p class="more" data-more>{{ c().more }} <s>{{ c().join.more }}<i aria-hidden="true"></i></s></p>
+    <h2 class="title" data-reveal>{{ c().join.title }}</h2>
+
+    <div class="join__grid">
+      <div class="aud" data-reveal>
+        <div class="aud__tabs" role="tablist" [attr.aria-label]="c().nav.join" (keydown)="tabKeys($event, aud(), c().join.tabs.length, pickAud)" #audTabs>
+          <span class="aud__ind" aria-hidden="true" [style.--x.px]="indX()" [style.--w.px]="indW()"></span>
+          @for (t of c().join.tabs; track t.id; let i = $index) {
+            <button type="button" role="tab" class="atab" [id]="'aud-' + t.id" [attr.aria-selected]="aud() === i"
+                    aria-controls="aud-panel" [tabindex]="aud() === i ? 0 : -1" (click)="pickAud(i)">{{ t.label }}</button>
+          }
+        </div>
+        @for (t of [audTab()]; track t.id) {
+          <div class="aud__panel" id="aud-panel" role="tabpanel" [attr.aria-labelledby]="'aud-' + t.id">
+            <h3>{{ t.title }}</h3>
+            <p>{{ t.body }}</p>
+            <div class="aud__ctas">
+              <a class="btn btn--pacific" [href]="mailto(t.subject)">{{ t.cta }} <span aria-hidden="true">→</span></a>
+              @if (t.id === 'teams') { <a class="btn btn--line" routerLink="/game">TideChallenge</a> }
+            </div>
+          </div>
+        }
+      </div>
+
+      <aside class="direct" data-reveal>
+        <p class="direct__k">{{ c().join.direct }}</p>
+        <a class="direct__mail" [href]="mailto('')">{{ email }}</a>
+        <button type="button" class="copy" (click)="copyEmail()" [class.is-done]="copied()">
+          <span aria-live="polite">{{ copied() ? c().join.copied : c().join.copy }}</span>
+        </button>
+        <p class="direct__k direct__k--follow">{{ c().join.follow }}</p>
+        <ul class="social">
+          @for (s of social; track s.id) {
+            <li><a [href]="s.href" target="_blank" rel="noopener"><span>{{ s.label }}</span><b>{{ s.handle }}</b><i aria-hidden="true">↗</i></a></li>
+          }
+        </ul>
+      </aside>
+    </div>
+  </div>
 </section>

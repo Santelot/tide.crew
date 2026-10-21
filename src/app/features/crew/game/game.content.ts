@@ -11,11 +11,11 @@
 
 export const CHALLENGE = {
   name: 'TideChallenge',
-  season: 'Offseason 2026',  // CONFIRMAR
+  season: 'Offseason 2026',
   summary:
     'Un reto offseason diseñado por TideCrew para seguir construyendo entre temporadas. ' +
     'Lo compartimos con cualquier equipo que quiera jugarlo: aquí vive todo lo que necesitas.',
-  contact: 'hola@tidecrew.co', // CONFIRMAR
+  contact: 'mariana.gomezb@tec.mx',
 };
 
 export interface KeyDate {
@@ -24,9 +24,10 @@ export interface KeyDate {
 }
 
 export const KEY_DATES: KeyDate[] = [
-  { label: 'Publicación del manual' }, // CONFIRMAR fechas
-  { label: 'Cierre de preguntas' },
-  { label: 'Día del reto' },
+  { label: 'Publicación del manual', date: '2026-10-26' },
+  { label: 'Abren las preguntas', date: '2026-10-30' },
+  { label: 'Cierran las preguntas', date: '2026-11-20' },
+  { label: 'Día del reto', date: '2026-12-05' },
 ];
 
 export type Kind = 'PDF' | 'CAD' | 'Video' | 'Enlace' | 'Formulario' | 'ZIP';
