@@ -10,6 +10,7 @@
   overflow-x: clip;
 }
 
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .wrap { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; padding: 0 var(--g); }
 
 /* ── Shared type ─────────────────────────────────────────────── */
@@ -113,6 +114,7 @@
 
 /* ── Hero ────────────────────────────────────────────────────── */
 .hero { position: relative; height: 200vh; background: var(--tc-foam); }
+@media (max-width: 759px) { .hero { height: 150vh; height: 150svh; } }
 .hero__stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; touch-action: pan-y; }
 .hero__water { z-index: 1; }
 
@@ -290,7 +292,7 @@
 .lvl:nth-child(3) .lvl__water { transition-delay: .3s, 0s; background: var(--tc-pacific); }
 .lvl:nth-child(1) .lvl__water { background: color-mix(in srgb, var(--tc-pacific) 35%, #fff); }
 .lvl:nth-child(2) .lvl__water { background: color-mix(in srgb, var(--tc-pacific) 68%, #fff); }
-.lvl__water svg { position: absolute; left: 0; bottom: calc(100% - 1px); width: 200%; height: 20px; animation: lvlwave 3s linear infinite; }
+.lvl__water svg { position: absolute; left: 0; bottom: calc(100% - 1px); width: 200%; height: 20px; animation: lvlwave 6s linear infinite; }
 .lvl__water path { fill: currentColor; }
 .lvl:nth-child(1) .lvl__water { color: color-mix(in srgb, var(--tc-pacific) 35%, #fff); }
 .lvl:nth-child(2) .lvl__water { color: color-mix(in srgb, var(--tc-pacific) 68%, #fff); }
@@ -352,15 +354,16 @@
   background: #fff; border: 1px solid var(--line);
 }
 .panel__sea { position: relative; overflow: hidden; background: color-mix(in srgb, var(--team) 8%, var(--tc-foam)); transition: background-color .6s; }
-.panel__water { position: absolute; left: 0; right: 0; bottom: 0; height: 44%; background: var(--team); color: var(--team); will-change: transform; }
+.panel__water { position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: var(--team); color: var(--team); will-change: transform; }
 .pw { position: absolute; left: 0; bottom: calc(100% - 1px); width: 200%; height: 26px; }
 .pw path { fill: currentColor; }
-.pw--back { opacity: .45; bottom: calc(100% + 4px); animation: pw 7s linear infinite reverse; }
-.pw--front { animation: pw 4.5s linear infinite; }
+.pw--back { opacity: .45; bottom: calc(100% + 4px); animation: pw 9s linear infinite reverse; }
+.pw--front { animation: pw 6s linear infinite; }
 @keyframes pw { to { transform: translateX(-50%); } }
-.panel__float { position: absolute; left: 50%; bottom: 30%; width: min(62%, 300px); translate: -50% 0; animation: bob 4.2s ease-in-out infinite; }
-@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
-.panel__logo { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 18px rgba(17, 25, 33, .22)); }
+.panel__stage { position: absolute; left: 8%; right: 8%; top: 7%; bottom: calc(26% + 56px); display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; }
+.panel__float { display: block; height: 100%; max-width: 100%; aspect-ratio: 1; animation: bob 4.2s ease-in-out infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+.panel__logo { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 14px 18px rgba(17, 25, 33, .22)); }
 .panel__num {
   position: absolute; left: 1.2rem; bottom: .6rem; font-family: var(--tc-font-display); font-style: italic; text-transform: uppercase;
   font-size: clamp(3rem, 2rem + 3vw, 5rem); line-height: 1; color: var(--team-ink); opacity: .9; pointer-events: none;
@@ -383,27 +386,31 @@
 
 @media (max-width: 999px) {
   .fleet { grid-template-columns: minmax(0, 1fr); }
-  .fleet__tabs { grid-template-columns: repeat(4, minmax(150px, 1fr)); overflow-x: auto; scrollbar-width: none; padding: 2px 2px 4px; margin: 0 calc(var(--g) * -1); padding-inline: var(--g); scroll-snap-type: x mandatory; }
-  .fleet__tabs::-webkit-scrollbar { display: none; }
-  .ftab { scroll-snap-align: start; }
+  .fleet__tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ftab { grid-template-columns: 36px minmax(0, 1fr); column-gap: .65rem; padding: .7rem .75rem; }
+  .ftab img { width: 36px; height: 36px; }
+  .ftab__name { font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ftab__meta { font-size: .78rem; }
   .ftab:hover { transform: none; }
   .panel { grid-template-columns: minmax(0, 1fr); }
-  .panel__sea { min-height: 300px; }
+  .panel__sea { min-height: 340px; }
 }
 
 /* ── Trayectoria ─────────────────────────────────────────────── */
 .history { position: relative; background: color-mix(in srgb, var(--tc-pacific) 5%, var(--tc-foam)); padding: clamp(5rem, 14vh, 9rem) 0; }
 .tl { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: clamp(1.5rem, 5vw, 5rem); }
-.tl__sticky { position: sticky; top: 22vh; display: grid; gap: .8rem; }
+.tl__aside { container-type: inline-size; min-width: 0; }
+.tl__sticky { position: sticky; top: 24vh; display: grid; gap: .8rem; overflow: hidden; padding-right: .5rem; }
 .tl__big {
   font-family: var(--tc-font-display); font-style: italic; text-transform: uppercase; color: var(--tc-pacific);
-  font-size: clamp(5rem, 2rem + 9vw, 11rem); line-height: .82; letter-spacing: -.01em; white-space: nowrap;
+  font-size: min(30cqi, 10rem); line-height: .86; letter-spacing: -.01em; white-space: nowrap; padding-right: .1em;
   animation: yearIn .8s var(--ease-out) both;
 }
 .tl__robot {
   width: fit-content; padding: .5rem .9rem; border-radius: 999px; background: var(--tc-night); color: var(--tc-foam);
   font: 600 .95rem/1 var(--tc-font-body); animation: yearIn .8s var(--ease-out) .08s both;
 }
+.tl__big--long { font-size: min(19cqi, 7rem); }
 @keyframes yearIn { from { opacity: 0; transform: translateY(40%); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
 
 .tl__main { position: relative; padding-left: 2.4rem; }
@@ -448,10 +455,11 @@
 }
 .award__lead { margin: 0; font: 400 clamp(1.3rem, 1rem + 1vw, 1.9rem)/1.4 var(--tc-font-editorial); color: rgba(255, 251, 254, .92); max-width: 36ch; }
 .award__badge { position: relative; display: flex; align-items: center; gap: 1.4rem; padding: 1.4rem 1.6rem; border-radius: var(--tc-radius-card); border: 1px solid rgba(0, 207, 230, .35); background: rgba(0, 207, 230, .06); }
-.award__ring { position: absolute; left: 1rem; top: 50%; width: 96px; height: 96px; translate: 0 -50%; rotate: -90deg; }
+.award__seal { position: relative; flex: none; display: grid; place-items: center; width: 96px; height: 96px; }
+.award__ring { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; }
 .award__ring circle { fill: none; stroke: var(--tc-crest); stroke-width: 3; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.6s var(--ease-out) .3s; }
 .award__badge:hover .award__ring circle, .award.is-lit .award__ring circle { stroke-dashoffset: 0; }
-.award__mk { flex: none; width: 64px; height: 64px; margin: 0 16px; }
+.award__mk { width: 58px; height: 58px; }
 .award__badge p { margin: 0; display: grid; gap: .35rem; }
 .award__badge strong { font: 700 clamp(1.2rem, 1rem + .7vw, 1.6rem)/1.15 var(--tc-font-title); }
 .award__badge span { font: 500 .95rem/1.2 var(--tc-font-body); color: var(--tc-crest); }
@@ -478,10 +486,15 @@
 
 /* ── TideChallenge ───────────────────────────────────────────── */
 .challenge { position: relative; background: var(--tc-pacific); color: var(--tc-foam); padding: clamp(5rem, 14vh, 9rem) 0; overflow: hidden; }
-.challenge__name {
-  margin: 0; padding: 0 var(--g); white-space: nowrap; font-family: var(--tc-font-display); font-style: italic; font-weight: 400;
-  text-transform: uppercase; font-size: clamp(4rem, 1rem + 14vw, 16rem); line-height: .86; color: var(--tc-foam); will-change: transform;
+.marq { overflow: hidden; padding: .2rem 0; }
+.marq__track { display: flex; align-items: center; width: max-content; will-change: transform; }
+.marq__item {
+  padding: 0 .12em 0 0; white-space: nowrap; font-family: var(--tc-font-display); font-style: italic; font-weight: 400;
+  text-transform: uppercase; font-size: clamp(4rem, 1rem + 14vw, 16rem); line-height: .9; color: var(--tc-foam);
 }
+.marq__item:nth-child(4n+3) { color: transparent; -webkit-text-stroke: 2px var(--tc-foam); }
+.marq__mk { flex: none; width: clamp(3rem, 1rem + 7vw, 9rem); height: auto; aspect-ratio: 1; margin: 0 clamp(1.2rem, 3vw, 3rem); }
+@media (prefers-reduced-motion: reduce) { .marq__track { flex-wrap: wrap; width: auto; } .marq__item ~ .marq__item, .marq__mk { display: none; } }
 .challenge__grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 2.5rem clamp(2rem, 5vw, 5rem); margin-top: clamp(2.5rem, 7vh, 4rem); align-items: start; }
 .challenge__season { margin: 0; font-family: var(--tc-font-title); font-weight: 700; font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.2rem); }
 .challenge__body { margin: 1rem 0 2rem; max-width: 42ch; font: 400 clamp(1.05rem, .95rem + .35vw, 1.25rem)/1.6 var(--tc-font-editorial); color: rgba(255, 251, 254, .92); }

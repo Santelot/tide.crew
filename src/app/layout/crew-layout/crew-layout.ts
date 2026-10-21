@@ -102,19 +102,15 @@ export class CrewLayout implements OnInit, OnDestroy {
     this.raf = requestAnimationFrame(() => this.probe());
   };
 
-  /** Read what's under the nav to pick its tone, and hide it while diving down. */
+  /** Read what's under the nav to pick its tone. The nav itself stays fixed. */
   private probe() {
     const y = scrollY;
     const els = document.elementsFromPoint(innerWidth / 2, 34);
     const sec = els.map((e) => (e as HTMLElement).closest?.('[data-tone]') as HTMLElement | null).find(Boolean);
     const t = (sec?.dataset['tone'] as 'light' | 'dark' | 'pacific') ?? 'light';
-    const goingDown = y > this.lastY + 4;
-    const goingUp = y < this.lastY - 4;
     this.zone.run(() => {
       if (t !== this.tone()) this.tone.set(t);
       this.scrolled.set(y > 12);
-      if (goingDown && y > 280 && !this.menu()) this.hidden.set(true);
-      else if (goingUp || y < 120) this.hidden.set(false);
     });
     this.lastY = y;
   }

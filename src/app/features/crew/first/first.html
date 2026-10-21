@@ -104,8 +104,8 @@
 <!-- ═══ FIRST — surfacing into daylight ═════════════════════════════════ -->
 <section id="first" class="first" data-tone="light" data-section>
   <svg class="surface" viewBox="0 0 2880 120" preserveAspectRatio="none" aria-hidden="true">
-    <path class="surface__back" d="M0 70 C 240 30 480 30 720 70 C 960 110 1200 110 1440 70 C 1680 30 1920 30 2160 70 C 2400 110 2640 110 2880 70 L 2880 120 L 0 120 Z" />
-    <path class="surface__front" d="M0 80 C 180 50 360 50 540 80 C 720 110 900 110 1080 80 C 1260 50 1440 50 1620 80 C 1800 110 1980 110 2160 80 C 2340 50 2520 50 2700 80 C 2790 95 2835 98 2880 96 L 2880 120 L 0 120 Z" />
+    <path class="surface__back" d="M0 70 Q360 30 720 70 T1440 70 T2160 70 T2880 70 L2880 120 L0 120 Z" />
+    <path class="surface__front" d="M0 80 Q180 52 360 80 T720 80 T1080 80 T1440 80 T1800 80 T2160 80 T2520 80 T2880 80 L2880 120 L0 120 Z" />
   </svg>
   <div class="wrap">
     <div class="first__head">
@@ -135,7 +135,7 @@
         <li class="lvl" [style.--lv]="i + 1" [class.is-hot]="hotLevel() === i"
             (pointerenter)="hotLevel.set(i)" (pointerleave)="hotLevel.set(-1)" (focusin)="hotLevel.set(i)" (focusout)="hotLevel.set(-1)" tabindex="0">
           <span class="lvl__water" aria-hidden="true">
-            <svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 20 C 50 0 100 0 150 20 C 200 40 250 40 300 20 C 350 0 375 5 400 12 L 400 40 L 0 40 Z" /></svg>
+            <svg viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 20 Q100 4 200 20 T400 20 T600 20 T800 20 L800 40 L0 40 Z" /></svg>
           </span>
           <span class="lvl__depth">{{ c().first.depth[i] }}</span>
           <span class="lvl__prog">{{ l.program }}</span>
@@ -187,10 +187,10 @@
                [style.--team]="cur().color" [style.--team-ink]="cur().ink" #panel>
         <div class="panel__sea" aria-hidden="true">
           <span class="panel__water" #panelWater>
-            <svg class="pw pw--back" viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 22 C 100 4 200 4 300 22 C 400 40 500 40 600 22 C 700 4 750 8 800 14 L 800 40 L 0 40 Z" /></svg>
-            <svg class="pw pw--front" viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 18 C 100 36 200 36 300 18 C 400 0 500 0 600 18 C 700 36 750 32 800 26 L 800 40 L 0 40 Z" /></svg>
+            <svg class="pw pw--back" viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 24 Q100 6 200 24 T400 24 T600 24 T800 24 L800 40 L0 40 Z" /></svg>
+            <svg class="pw pw--front" viewBox="0 0 800 40" preserveAspectRatio="none"><path d="M0 20 Q100 34 200 20 T400 20 T600 20 T800 20 L800 40 L0 40 Z" /></svg>
           </span>
-          <span class="panel__float"><img class="panel__logo" #panelLogo [src]="cur().logo" [alt]="cur().name" width="320" height="320" /></span>
+          <span class="panel__stage"><span class="panel__float"><img class="panel__logo" #panelLogo [src]="cur().logo" [alt]="cur().name" width="320" height="320" /></span></span>
           <span class="panel__num">{{ cur().number ?? cur().program }}</span>
         </div>
         <div class="panel__info" #panelInfo>
@@ -234,7 +234,7 @@
       <div class="tl__aside" aria-hidden="true">
         <div class="tl__sticky">
           @for (y of [activeSeason()]; track y) {
-            <span class="tl__big">{{ seasons[y].year }}</span>
+            <span class="tl__big" [class.tl__big--long]="seasons[y].year.length > 4">{{ seasons[y].year }}</span>
             @if (seasons[y].robot) { <span class="tl__robot">{{ seasons[y].robot }}</span> }
           }
         </div>
@@ -278,10 +278,9 @@
     <div class="award" data-reveal>
       <p class="award__lead">{{ c().impact.lead }}</p>
       <div class="award__badge">
-        <svg class="award__ring" viewBox="0 0 120 120" aria-hidden="true">
+        <span class="award__seal"><svg class="award__ring" viewBox="0 0 120 120" aria-hidden="true">
           <circle cx="60" cy="60" r="54" pathLength="1" />
-        </svg>
-        <tc-mark class="award__mk" tone="white" label="" />
+        </svg><tc-mark class="award__mk" tone="white" label="" /></span>
         <p><strong>{{ c().impact.award }}</strong><span>{{ c().impact.awardWhere }}</span></p>
       </div>
     </div>
@@ -303,7 +302,14 @@
   <div class="wrap">
     <p class="more more--foam" data-more>{{ c().more }} <s>{{ c().challenge.more }}<i aria-hidden="true"></i></s></p>
   </div>
-  <h2 class="challenge__name" #challengeName>TideChallenge</h2>
+  <h2 class="sr">TideChallenge</h2>
+  <div class="marq" aria-hidden="true">
+    <div class="marq__track" #challengeName>
+      @for (k of [0, 1, 2, 3]; track k) {
+        <span class="marq__item">TideChallenge</span><tc-mark class="marq__mk" tone="white" label="" />
+      }
+    </div>
+  </div>
   <div class="wrap challenge__grid">
     <div class="challenge__intro">
       <p class="challenge__season">{{ c().challenge.season }}</p>
