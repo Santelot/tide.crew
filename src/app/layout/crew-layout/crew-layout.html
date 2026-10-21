@@ -49,6 +49,17 @@
 
 <main id="contenido"><router-outlet /></main>
 
+<!-- The ascent back to the surface (see ascend()). -->
+<div class="ascent" #ascent aria-hidden="true">
+  <svg class="ascent__edge" viewBox="0 0 2880 80" preserveAspectRatio="none"><path d="M0 40 Q360 0 720 40 T1440 40 T2160 40 T2880 40 L2880 80 L0 80 Z" /></svg>
+  <div class="ascent__body">
+    @for (b of bubbles; track $index) {
+      <i [style.left.%]="b.x" [style.width.px]="b.r" [style.height.px]="b.r" [style.animation-duration.s]="b.d" [style.animation-delay.s]="b.delay"></i>
+    }
+    <tc-mark class="ascent__mark" tone="white" label="" />
+  </div>
+</div>
+
 <footer class="foot" data-tone="dark">
   <svg class="foot__waves" viewBox="0 0 2880 100" preserveAspectRatio="none" aria-hidden="true">
     <g class="fw fw--back"><path d="M0 58 C 120 45 240 45 360 58 C 480 71 600 71 720 58 C 840 45 960 45 1080 58 C 1200 71 1320 71 1440 58 C 1560 45 1680 45 1800 58 C 1920 71 2040 71 2160 58 C 2280 45 2400 45 2520 58 C 2640 71 2760 71 2880 58 L 2880 0 L 0 0 Z"/></g>

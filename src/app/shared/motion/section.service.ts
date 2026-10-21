@@ -4,4 +4,6 @@ import { Injectable, signal } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class SectionService {
   readonly active = signal('');
+  /** Bumped when the visitor arrives back at the surface (the hero splashes). */
+  readonly surfaced = signal(0);
 }

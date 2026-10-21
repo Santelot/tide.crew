@@ -43,6 +43,8 @@ const vec3 CREST    = vec3(0.0, 0.812, 0.902);
 const vec3 FOAM     = vec3(1.0, 0.984, 0.996);
 const vec3 UNDERTOW = vec3(0.0, 0.263, 0.290);
 const vec3 NIGHT    = vec3(0.067, 0.098, 0.129);
+// Pacific pulled a quarter of the way toward Undertow: white text keeps its contrast.
+const vec3 SEA      = vec3(0.0, 0.554, 0.614);
 
 vec2 hash2(vec2 p){
   p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
@@ -76,18 +78,18 @@ vec3 palette(float pal, float d, float H, out float dark){
   if (pal < 0.5) {
     float k = smoothstep(0.0, 2.2 * H, d);
     dark = 0.12 * k;
-    return mix(PACIFIC, vec3(0.0, 0.56, 0.63), k);
+    return mix(SEA, vec3(0.0, 0.48, 0.54), k);
   }
   if (pal < 1.5) {
     float k1 = smoothstep(0.0, 0.55 * H, d);
     float k2 = smoothstep(0.35 * H, 1.15 * H, d);
     dark = 0.4 * k1 + 0.6 * k2;
-    return mix(mix(PACIFIC, UNDERTOW, k1), NIGHT, k2);
+    return mix(mix(SEA, UNDERTOW, k1), NIGHT, k2);
   }
   float r1 = smoothstep(0.0, 0.3 * H, d);
   float r2 = smoothstep(0.15 * H, 0.95 * H, d);
   dark = 1.0 - 0.35 * r1 - 0.65 * r2;
-  return mix(mix(NIGHT, UNDERTOW, r1), PACIFIC, r2);
+  return mix(mix(NIGHT, UNDERTOW, r1), SEA, r2);
 }
 
 void main(){
@@ -145,14 +147,14 @@ void main(){
   float c1 = pow(1.0 - smoothstep(0.0, 0.10, cellEdge(q, t * 0.85)), 3.0);
   float c2 = pow(1.0 - smoothstep(0.0, 0.07, cellEdge(q * 1.75 + 3.1, t * 1.15)), 3.0);
   float c = (c1 * 0.62 + c2 * 0.38) * light * light;
-  col = mix(col, CREST, clamp(c * 0.5 + glow * 0.3, 0.0, 1.0));
-  col = mix(col, FOAM, c * c * 0.16);
+  col = mix(col, CREST, clamp(c * 0.42 + glow * 0.3, 0.0, 1.0));
+  col = mix(col, FOAM, c * c * 0.13);
 
   // Sunlight shafts, strongest just under the surface.
   float ang = (X * 0.55 + Y * 0.22) / H;
   float ray = pow(0.5 + 0.5 * sin(ang * 9.0 + sin(ang * 2.3 + t * 0.21) * 1.6 + t * 0.12), 7.0)
             * (0.55 + 0.45 * sin(ang * 3.1 - t * 0.27));
-  col += FOAM * ray * 0.09 * exp(-d / (0.55 * H)) * light;
+  col += FOAM * ray * 0.075 * exp(-d / (0.55 * H)) * light;
 
   // The cursor carries a little light; in the deep it is the only light there is.
   float dm = length(P - uMouse.xy);
@@ -383,7 +385,8 @@ export class Ocean implements AfterViewInit, OnDestroy {
     }
   }
 
-  private time() { return this.reduced ? 3.0 : (performance.now() - this.t0) / 1000; }
+  /** Water time runs at 75% of real time: a calmer sea. */
+  private time() { return this.reduced ? 3.0 : (performance.now() - this.t0) / 1000 * 0.75; }
 
   private frame() {
     const gl = this.gl!;

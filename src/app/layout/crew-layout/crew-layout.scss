@@ -118,6 +118,20 @@
 
 main { position: relative; z-index: 1; display: block; }
 
+/* ── The ascent ──────────────────────────────────────────────── */
+.ascent { position: fixed; left: 0; right: 0; top: -60px; bottom: -40px; z-index: 900; visibility: hidden; pointer-events: none; will-change: transform; }
+.ascent__edge { position: absolute; left: 0; top: 0; width: 200%; height: 80px; animation: ascentWave 1.6s linear infinite; }
+.ascent__edge path { fill: #008D9C; }
+@keyframes ascentWave { to { transform: translateX(-50%); } }
+.ascent__body { position: absolute; left: 0; right: 0; top: 79px; bottom: 0; overflow: hidden; background: linear-gradient(180deg, #008D9C 0%, #006F7C 55%, #00434A 100%); }
+.ascent__body i {
+  position: absolute; bottom: -40px; border-radius: 50%; border: 1.5px solid rgba(255, 251, 254, .55);
+  background: radial-gradient(circle at 32% 30%, rgba(255, 251, 254, .5), transparent 45%);
+  animation: ascentBubble linear infinite;
+}
+@keyframes ascentBubble { from { transform: translateY(0); } to { transform: translateY(-120vh); } }
+.ascent__mark { position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; translate: -50% -50%; opacity: .9; }
+
 /* ── Footer ──────────────────────────────────────────────────── */
 .foot { position: relative; z-index: 1; background: var(--tc-night); color: var(--tc-foam); overflow: hidden; }
 .foot__waves { display: block; width: 200%; height: clamp(50px, 7vw, 90px); }

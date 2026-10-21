@@ -40,6 +40,12 @@ export class MotionService {
 
   lock(on: boolean) { on ? this.lenis?.stop() : this.lenis?.start(); }
 
+  /** Jump instantly (used while the screen is covered). */
+  jump(y: number) {
+    if (this.lenis) this.lenis.scrollTo(y, { immediate: true, force: true });
+    else window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+  }
+
   scrollTo(target: string | HTMLElement | number, offset = 0) {
     const el = typeof target === 'string' ? document.querySelector<HTMLElement>(target) : target;
     if (el === null) return;

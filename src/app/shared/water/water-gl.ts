@@ -4,6 +4,9 @@ import {
 } from '@angular/core';
 import { IntroService } from '../motion/intro.service';
 
+/** Water time runs at 75% of real time: a calmer sea. */
+const WATER_SPEED = 0.75;
+
 const VERT = `
 attribute vec2 aPos;
 varying vec2 vUv;
@@ -27,6 +30,7 @@ varying vec2 vUv;
 const vec3 PACIFIC = vec3(0.0, 0.651, 0.722);
 const vec3 CREST   = vec3(0.0, 0.812, 0.902);
 const vec3 FOAM    = vec3(1.0, 0.984, 0.996);
+const vec3 SEA     = vec3(0.0, 0.554, 0.614);
 
 vec2 hash2(vec2 p){
   p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
@@ -96,9 +100,9 @@ void main(){
   float depth = clamp(-e, 0.0, 1.0);
   float c = (c1 * 0.62 + c2 * 0.38) * mix(1.0, 0.35, smoothstep(0.0, 0.85, depth));
 
-  vec3 col = PACIFIC;
-  col = mix(col, CREST, clamp(c * 0.5 + glow * 0.3, 0.0, 1.0));
-  col = mix(col, FOAM, c * c * 0.16);
+  vec3 col = mix(PACIFIC, SEA, smoothstep(0.0, 0.35, depth));
+  col = mix(col, CREST, clamp(c * 0.42 + glow * 0.3, 0.0, 1.0));
+  col = mix(col, FOAM, c * c * 0.13);
   float lip = (1.0 - smoothstep(0.0, 0.035, -e)) * water;
   col = mix(col, CREST, lip * 0.45);
 
@@ -167,7 +171,7 @@ export class WaterGl implements AfterViewInit, OnDestroy {
   /** Surface height in px from the top of the canvas, at a horizontal fraction. */
   surfacePx(xFrac = 0.5): number {
     const r = this.host.nativeElement.getBoundingClientRect();
-    const t = (performance.now() - this.t0) / 1000;
+    const t = (performance.now() - this.t0) / 1000 * WATER_SPEED;
     const x = xFrac * (r.width / Math.max(1, r.height));
     const swell = 0.011 * Math.sin(x * 6 + t * 0.85) + 0.006 * Math.sin(x * 13 - t * 1.25 + 1.7);
     return r.height * (1 - (this.level + swell));
@@ -182,7 +186,7 @@ export class WaterGl implements AfterViewInit, OnDestroy {
     const i = this.next * 4;
     this.ripples[i] = x;
     this.ripples[i + 1] = Math.min(y, this.level);
-    this.ripples[i + 2] = (performance.now() - this.t0) / 1000;
+    this.ripples[i + 2] = (performance.now() - this.t0) / 1000 * WATER_SPEED;
     this.ripples[i + 3] = strength;
     this.next = (this.next + 1) % 8;
   }
@@ -267,7 +271,7 @@ export class WaterGl implements AfterViewInit, OnDestroy {
 
   private frame() {
     const gl = this.gl; if (!gl) return;
-    const t = this.reduced ? 2.0 : (performance.now() - this.t0) / 1000;
+    const t = this.reduced ? 2.0 : (performance.now() - this.t0) / 1000 * WATER_SPEED;
     gl.uniform1f(this.u['uTime'], t);
     gl.uniform1f(this.u['uLevel'], this.level);
     gl.uniform4fv(this.u['uRip'], this.ripples);

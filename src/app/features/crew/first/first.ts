@@ -132,6 +132,8 @@ export class First implements AfterViewInit, OnDestroy {
 
   constructor() {
     effect(() => { if (this.intro.cleared() && this.ready) this.enter(); });
+    // Back at the surface after the ascent: the water splashes under the mark.
+    effect(() => { if (this.sections.surfaced() > 0) setTimeout(() => this.splash(), 0); });
     // The statement is re-split per language, so its scroll fill is rebuilt after re-render.
     effect(() => {
       this.words();
@@ -201,7 +203,34 @@ export class First implements AfterViewInit, OnDestroy {
     if (!strong && now - this.lastTouch < 70) return;
     this.lastTouch = now;
     this.water().touch(ev.clientX, ev.clientY, strong ? 1.5 : 0.55);
+    this.nudge(ev.clientX, ev.clientY, strong ? 1 : 0.18);
     if (strong) this.sound.bloop(0.1);
+  }
+
+  /**
+   * The mark is a buoy: water pushed near it shoves it down and tips it away,
+   * and a spring brings it back bobbing. Strength 1 ≈ a tap right beside it.
+   */
+  private buoy = { y: 0, vy: 0, a: 0, va: 0, last: 0 };
+  private nudge(clientX: number, clientY: number, strength: number) {
+    if (this.motion.reduced) return;
+    const r = this.markWrap().nativeElement.getBoundingClientRect();
+    if (!r.width) return;
+    const dx = (clientX - (r.left + r.width / 2)) / r.width;
+    const dy = (clientY - (r.top + r.height * 0.86)) / r.height;
+    const reach = Math.exp(-(dx * dx) * 1.4) * Math.exp(-Math.max(0, Math.abs(dy) - 0.2) * 2.2);
+    if (reach < 0.02) return;
+    this.buoy.vy += strength * reach * r.height * 0.9;
+    this.buoy.va += -Math.sign(dx || 1) * strength * reach * 38;
+  }
+
+  /** Arriving back at the surface: a splash right under the mark. */
+  private splash() {
+    const r = this.markWrap().nativeElement.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height * 0.9;
+    this.water().touch(x, y, 2.4);
+    this.nudge(x, y, 2.2);
+    this.sound.bloop(0);
   }
 
   /** Buttons lean toward the pointer, just a little, like something floating. */
@@ -336,7 +365,7 @@ export class First implements AfterViewInit, OnDestroy {
     const level = this.tide.level + (1.12 - this.tide.level) * fill;
     water.setLevel(level);
 
-    const t = (performance.now() - this.t0) / 1000;
+    const t = (performance.now() - this.t0) / 1000 * 0.75;
     const narrow = W < 760;
 
     // The mark rides the surface, tilting with the swell.
@@ -346,7 +375,15 @@ export class First implements AfterViewInit, OnDestroy {
     const slope = water.surfacePx(mx + 0.03) - water.surfacePx(mx - 0.03);
     const tilt = clamp(slope * 0.35, -6, 6);
     const mh = mw.offsetHeight;
-    mw.style.transform = `translate3d(0, ${sy - mh * 0.86}px, 0) rotate(${tilt}deg)`;
+    // Buoy physics: damped springs on depth and tilt.
+    const b = this.buoy;
+    const now = performance.now();
+    const dt = Math.min(0.05, b.last ? (now - b.last) / 1000 : 0.016);
+    b.last = now;
+    b.vy += (-34 * b.y - 3.6 * b.vy) * dt;  b.y += b.vy * dt;
+    b.va += (-26 * b.a - 3.2 * b.va) * dt;  b.a += b.va * dt;
+    b.y = clamp(b.y, -mh * 0.35, mh * 0.35); b.a = clamp(b.a, -22, 22);
+    mw.style.transform = `translate3d(0, ${sy - mh * 0.86 + b.y}px, 0) rotate(${tilt + b.a}deg)`;
 
     // Its shadow: a flattened, blurred silhouette just under the surface, drifting with the swell.
     const sh = this.shadow().nativeElement;
@@ -372,7 +409,9 @@ export class First implements AfterViewInit, OnDestroy {
     if (!this.motion.reduced && t - this.lastDrop > 2.4 && p < 0.5) {
       this.lastDrop = t;
       const r = stageEl.getBoundingClientRect();
-      water.touch(r.left + W * (0.1 + Math.random() * 0.8), r.top + sy + 20 + Math.random() * Math.max(10, depthPx - 40), 0.7);
+      const dx = r.left + W * (0.1 + Math.random() * 0.8), dy = r.top + sy + 20 + Math.random() * Math.max(10, depthPx - 40);
+      water.touch(dx, dy, 0.7);
+      this.nudge(dx, dy, 0.35);
     }
   }
 
