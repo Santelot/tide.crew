@@ -130,7 +130,7 @@ export const SEASONS: Season[] = [
 const es = {
   nav: {
     tidecrew: 'Qué es TideCrew', first: 'FIRST', teams: 'Equipos', history: 'Trayectoria', impact: 'Impacto',
-    challenge: 'TideChallenge', join: 'Únete', menu: 'Menú', close: 'Cerrar', sections: 'Secciones',
+    challenge: 'TideChallenge', join: 'Únete', menu: 'Menú', close: 'Cerrar', sections: 'Secciones', sound: 'Sonido del mar',
   },
   loader: { text: 'Subiendo la marea', skip: 'Saltar' },
   more: 'Más que',
@@ -300,7 +300,7 @@ export type Copy = typeof es;
 const en: Copy = {
   nav: {
     tidecrew: 'What is TideCrew', first: 'FIRST', teams: 'Teams', history: 'Track record', impact: 'Impact',
-    challenge: 'TideChallenge', join: 'Join', menu: 'Menu', close: 'Close', sections: 'Sections',
+    challenge: 'TideChallenge', join: 'Join', menu: 'Menu', close: 'Close', sections: 'Sections', sound: 'Ocean sound',
   },
   loader: { text: 'Bringing the tide in', skip: 'Skip' },
   more: 'More than',

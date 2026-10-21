@@ -397,7 +397,7 @@
 }
 
 /* ── Trayectoria ─────────────────────────────────────────────── */
-.history { position: relative; background: color-mix(in srgb, var(--tc-pacific) 5%, var(--tc-foam)); padding: clamp(5rem, 14vh, 9rem) 0; }
+.history { position: relative; background: var(--tc-foam); padding: clamp(5rem, 14vh, 9rem) 0; }
 .tl { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: clamp(1.5rem, 5vw, 5rem); }
 .tl__aside { container-type: inline-size; min-width: 0; }
 .tl__sticky { position: sticky; top: 24vh; display: grid; gap: .8rem; overflow: hidden; padding-right: .5rem; }
@@ -559,3 +559,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tc-crest); outl
   .tl__big, .tl__robot, .aud__panel { animation: none; }
   .anthem__w--x { transition: none; }
 }
+
+/* ── The live ocean takes over the water sections once WebGL is running ── */
+:host(.ocean-on) .about, :host(.ocean-on) .impact, :host(.ocean-on) .challenge { background: transparent; }
+:host(.ocean-on) .bubbles { display: none; }
+:host(.ocean-on) .impact { padding-top: calc(clamp(5rem, 14vh, 9rem) + 40px); }

@@ -1,3 +1,6 @@
+<!-- ═══ THE OCEAN — one living sea behind every water section ═══════════ -->
+<tc-ocean />
+
 <!-- ═══ DEPTH RAIL — where you are, one click to anywhere ═══════════════ -->
 <nav class="rail" [class.is-on]="railOn()" [attr.data-on]="railTone()" [attr.aria-label]="c().nav.sections">
   <span class="rail__depth" aria-hidden="true"><b>{{ depth() }}</b> m</span>
@@ -47,7 +50,7 @@
 </section>
 
 <!-- ═══ QUÉ ES TIDECREW — underwater, Pacific ═══════════════════════════ -->
-<section id="tidecrew" class="about" data-tone="pacific" data-section>
+<section id="tidecrew" class="about" data-tone="pacific" data-section data-water>
   <div class="bubbles" aria-hidden="true">
     @for (b of bubbles; track $index) {
       <i [style.left.%]="b.x" [style.width.px]="b.r" [style.height.px]="b.r" [style.animation-duration.s]="b.d" [style.animation-delay.s]="b.delay"></i>
@@ -265,14 +268,14 @@
 </section>
 
 <!-- ═══ IMPACTO — into the deep ═════════════════════════════════════════ -->
-<section id="impacto" class="impact" data-tone="dark" data-section>
+<section id="impacto" class="impact" data-tone="dark" data-section data-water>
   <div class="bubbles bubbles--deep" aria-hidden="true">
     @for (b of bubbles; track $index) {
       <i [style.left.%]="b.x" [style.width.px]="b.r" [style.height.px]="b.r" [style.animation-duration.s]="b.d * 1.3" [style.animation-delay.s]="b.delay"></i>
     }
   </div>
   <div class="wrap">
-    <p class="more more--deep" data-more>{{ c().more }} <s>{{ c().impact.more }}<i aria-hidden="true"></i></s></p>
+    <p class="more more--foam" data-more>{{ c().more }} <s>{{ c().impact.more }}<i aria-hidden="true"></i></s></p>
     <h2 class="title title--foam" data-reveal>{{ c().impact.title }}</h2>
 
     <div class="award" data-reveal>
@@ -298,7 +301,7 @@
 </section>
 
 <!-- ═══ TIDECHALLENGE ═══════════════════════════════════════════════════ -->
-<section id="tidechallenge" class="challenge" data-tone="pacific" data-section #challenge>
+<section id="tidechallenge" class="challenge" data-tone="pacific" data-section data-water #challenge>
   <div class="wrap">
     <p class="more more--foam" data-more>{{ c().more }} <s>{{ c().challenge.more }}<i aria-hidden="true"></i></s></p>
   </div>
@@ -343,6 +346,10 @@
 
 <!-- ═══ ÚNETE ═══════════════════════════════════════════════════════════ -->
 <section id="unete" class="join" data-tone="light" data-section>
+  <svg class="surface" viewBox="0 0 2880 120" preserveAspectRatio="none" aria-hidden="true">
+    <path class="surface__back" d="M0 70 Q360 30 720 70 T1440 70 T2160 70 T2880 70 L2880 120 L0 120 Z" />
+    <path class="surface__front" d="M0 80 Q180 52 360 80 T720 80 T1080 80 T1440 80 T1800 80 T2160 80 T2520 80 T2880 80 L2880 120 L0 120 Z" />
+  </svg>
   <div class="wrap">
     <p class="more" data-more>{{ c().more }} <s>{{ c().join.more }}<i aria-hidden="true"></i></s></p>
     <h2 class="title" data-reveal>{{ c().join.title }}</h2>

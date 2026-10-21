@@ -9,6 +9,8 @@ import { IntroService } from '../../../shared/motion/intro.service';
 import { MotionService, ScrollTrigger, gsap } from '../../../shared/motion/motion.service';
 import { SectionService } from '../../../shared/motion/section.service';
 import { WaterGl } from '../../../shared/water/water-gl';
+import { Ocean } from '../../../shared/ocean/ocean';
+import { TideSound } from '../../../shared/ocean/tide-sound.service';
 import { Wake } from '../../../shared/wake/wake';
 import {
   COACHES, CONTACT_EMAIL, COPY, LADDER, MILESTONES, SEASONS, SOCIAL, TEAMS, Team,
@@ -21,7 +23,7 @@ const pad = (n: number) => String(Math.max(0, n)).padStart(2, '0');
 @Component({
   selector: 'app-first',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, WaterGl, Mark, Wake],
+  imports: [RouterLink, WaterGl, Ocean, Mark, Wake],
   templateUrl: './first.html',
   styleUrl: './first.scss',
 })
@@ -32,6 +34,7 @@ export class First implements AfterViewInit, OnDestroy {
   private readonly intro = inject(IntroService);
   protected readonly motion = inject(MotionService);
   protected readonly sections = inject(SectionService);
+  private readonly sound = inject(TideSound);
 
   // ── Content ─────────────────────────────────────────────────────
   protected readonly lang = this.langSvc.lang;
@@ -95,6 +98,7 @@ export class First implements AfterViewInit, OnDestroy {
 
   // ── Elements ────────────────────────────────────────────────────
   private readonly water = viewChild.required(WaterGl);
+  private readonly ocean = viewChild.required(Ocean);
   private readonly heroEl = viewChild.required<ElementRef<HTMLElement>>('hero');
   private readonly stage = viewChild.required<ElementRef<HTMLElement>>('stage');
   private readonly copyEl = viewChild.required<ElementRef<HTMLElement>>('copy');
@@ -138,7 +142,20 @@ export class First implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    const root: HTMLElement = this.host.nativeElement;
+    const sec = (id: string) => root.querySelector<HTMLElement>('#' + id)!;
+    const ocean = this.ocean();
+    ocean.setBands([
+      { el: sec('tidecrew'), surface: false, palette: 0 },
+      { el: sec('impacto'), surface: true, palette: 1 },
+      { el: sec('tidechallenge'), surface: false, palette: 2 },
+    ]);
+    // Water sections keep their painted colour until the live ocean is actually running.
+    if (ocean.ready) root.classList.add('ocean-on');
+    ocean.onSplash = (d) => this.sound.bloop(d);
     this.zone.runOutsideAngular(() => {
+      root.addEventListener('pointermove', this.magnet, { passive: true });
+      root.addEventListener('pointerout', this.unmagnet, { passive: true });
       this.ctx = gsap.context(() => this.build(), this.host.nativeElement);
       this.buildStory();
       gsap.ticker.add(this.frame);
@@ -157,6 +174,9 @@ export class First implements AfterViewInit, OnDestroy {
     clearInterval(this.clock);
     clearTimeout(this.copiedT);
     removeEventListener('resize', this.onResize);
+    const root: HTMLElement = this.host.nativeElement;
+    root.removeEventListener('pointermove', this.magnet);
+    root.removeEventListener('pointerout', this.unmagnet);
     this.storyCtx?.revert();
     this.ctx?.revert();
     this.sections.active.set('');
@@ -181,7 +201,25 @@ export class First implements AfterViewInit, OnDestroy {
     if (!strong && now - this.lastTouch < 70) return;
     this.lastTouch = now;
     this.water().touch(ev.clientX, ev.clientY, strong ? 1.5 : 0.55);
+    if (strong) this.sound.bloop(0.1);
   }
+
+  /** Buttons lean toward the pointer, just a little, like something floating. */
+  private magnet = (ev: PointerEvent) => {
+    if (ev.pointerType !== 'mouse' || this.motion.reduced) return;
+    const btn = (ev.target as Element | null)?.closest?.('.btn') as HTMLElement | null;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const x = (ev.clientX - r.left - r.width / 2) / r.width;
+    const y = (ev.clientY - r.top - r.height / 2) / r.height;
+    gsap.to(btn, { x: x * 10, y: y * 8, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
+  };
+
+  private unmagnet = (ev: PointerEvent) => {
+    const btn = (ev.target as Element | null)?.closest?.('.btn') as HTMLElement | null;
+    if (!btn || btn.contains(ev.relatedTarget as Node)) return;
+    gsap.to(btn, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.45)', overwrite: 'auto' });
+  };
 
   protected jump(ev: Event, id: string) {
     ev.preventDefault();
@@ -376,8 +414,17 @@ export class First implements AfterViewInit, OnDestroy {
     });
 
     if (!reduced) {
+      // One reveal language: titles rise out of a mask, everything else floats up and settles.
       gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
-        gsap.from(el, { y: 40, opacity: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
+        const st = { trigger: el, start: 'top 90%', once: true };
+        if (el.classList.contains('title') || el.classList.contains('subtitle')) {
+          gsap.fromTo(el, { clipPath: 'inset(0% 0% 100% 0%)', y: 48 }, {
+            clipPath: 'inset(0% 0% -12% 0%)', y: 0, duration: 1.25, ease: 'expo.out', scrollTrigger: st,
+            onComplete: () => gsap.set(el, { clearProps: 'clipPath' }),
+          });
+        } else {
+          gsap.from(el, { y: 32, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: st });
+        }
       });
       gsap.utils.toArray<HTMLElement>('.stat__v[data-to]').forEach((el) => {
         const to = Number(el.dataset['to'] ?? 0);
@@ -388,8 +435,9 @@ export class First implements AfterViewInit, OnDestroy {
           scrollTrigger: { trigger: el, start: 'top 88%', once: true },
         });
       });
-      gsap.to('.surface__front', { x: -1080, duration: 11, ease: 'none', repeat: -1 });
-      gsap.to('.surface__back', { x: -1440, duration: 19, ease: 'none', repeat: -1 });
+      // Wave paths repeat exactly every half width, so shifting by -50% loops without a seam.
+      gsap.to('.surface__front', { xPercent: -50, duration: 12, ease: 'none', repeat: -1 });
+      gsap.fromTo('.surface__back', { xPercent: -50 }, { xPercent: 0, duration: 20, ease: 'none', repeat: -1 });
     }
 
     const award = root.querySelector<HTMLElement>('.award');
@@ -421,9 +469,15 @@ export class First implements AfterViewInit, OnDestroy {
     });
 
     if (!reduced) {
-      gsap.fromTo(this.challengeName().nativeElement, { xPercent: 8 }, {
-        xPercent: -16, ease: 'none',
-        scrollTrigger: { trigger: this.challenge().nativeElement, start: 'top bottom', end: 'bottom top', scrub: true },
+      // TideChallenge runs as an endless marquee; scrolling pushes it faster, in the scroll's direction.
+      const loop = gsap.to(this.challengeName().nativeElement, { xPercent: -50, duration: 26, ease: 'none', repeat: -1 });
+      ScrollTrigger.create({
+        trigger: this.challenge().nativeElement, start: 'top bottom', end: 'bottom top',
+        onUpdate: (st) => {
+          const v = clamp(st.getVelocity() / 300, -8, 8);
+          gsap.to(loop, { timeScale: v >= 0 ? 1 + v : Math.min(-1, v), duration: 0.25, overwrite: true });
+          gsap.to(loop, { timeScale: 1, duration: 1.4, delay: 0.3, ease: 'power2.out' });
+        },
       });
     }
   }

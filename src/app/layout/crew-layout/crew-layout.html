@@ -2,6 +2,8 @@
   <tc-loader [text]="c().loader.text" [skip]="c().loader.skip" (leaving)="loaderLeaving()" (done)="loader.set(false)" />
 }
 
+<tc-cursor />
+
 <a class="skiplink" href="#contenido">{{ langSvc.lang() === 'es' ? 'Saltar al contenido' : 'Skip to content' }}</a>
 
 <header [class]="'nav tone-' + tone()"
@@ -19,6 +21,10 @@
   </nav>
 
   <div class="actions">
+    <button type="button" class="snd" [class.on]="sound.on()" [attr.aria-pressed]="sound.on()" (click)="sound.toggle()"
+            [attr.aria-label]="c().nav.sound" [attr.title]="c().nav.sound">
+      <i></i><i></i><i></i><i></i>
+    </button>
     <div class="lang" role="group" aria-label="Idioma / Language">
       <button type="button" [class.on]="langSvc.lang() === 'es'" [attr.aria-pressed]="langSvc.lang() === 'es'" (click)="setLang('es')">ES</button>
       <button type="button" [class.on]="langSvc.lang() === 'en'" [attr.aria-pressed]="langSvc.lang() === 'en'" (click)="setLang('en')">EN</button>

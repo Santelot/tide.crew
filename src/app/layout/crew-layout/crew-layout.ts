@@ -11,11 +11,13 @@ import { Mark } from '../../shared/mark/mark';
 import { MotionService } from '../../shared/motion/motion.service';
 import { IntroService } from '../../shared/motion/intro.service';
 import { Wake } from '../../shared/wake/wake';
+import { Cursor } from '../../shared/cursor/cursor';
+import { TideSound } from '../../shared/ocean/tide-sound.service';
 
 @Component({
   selector: 'app-crew-layout',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, Loader, Mark, Wake],
+  imports: [RouterOutlet, Cursor, Loader, Mark, Wake],
   templateUrl: './crew-layout.html',
   styleUrl: './crew-layout.scss',
 })
@@ -27,6 +29,7 @@ export class CrewLayout implements OnInit, OnDestroy {
   protected readonly langSvc = inject(LangService);
   protected readonly c = computed(() => COPY[this.langSvc.lang()]);
   protected readonly sections = inject(SectionService);
+  protected readonly sound = inject(TideSound);
   protected readonly email = CONTACT_EMAIL;
   protected readonly coaches = COACHES;
   protected readonly social = SOCIAL;
