@@ -19,6 +19,12 @@
 
   <div class="wrap hero__grid">
     <div class="hero__intro">
+      @if (released()) {
+        <div class="reveal" data-in>
+          <img class="reveal__logo" src="/brand/frozen-blitz.webp" [alt]="gameName" width="900" height="539" />
+          <p class="reveal__k">El juego de la temporada ya está aquí.</p>
+        </div>
+      }
       <p class="summary" data-in>{{ c.summary }}</p>
       <nav class="quick" data-in aria-label="Accesos rápidos">
         <a class="qbtn qbtn--solid" href="/game#manual" (click)="go($event, 'manual')">Manual del juego</a>
@@ -35,7 +41,7 @@
             <span class="digit"><b>{{ u }}</b><small>{{ ['días', 'horas', 'min', 'seg'][i] }}</small></span>
           }
         </div>
-        <p class="clock__when">{{ fmt(m.at, true) }}</p>
+        <p class="clock__when">{{ fmt(m.at, true) }} · {{ fmtTime(m.at) }}</p>
       } @else {
         <p class="clock__label">El reto ya se jugó. Gracias por remar con nosotros.</p>
       }
@@ -75,7 +81,7 @@
           </li>
         }
       </ul>
-      <p class="index__count"><b>{{ published }}</b> de {{ total }} publicados</p>
+      <p class="index__count"><b>{{ published() }}</b> de {{ total }} publicados</p>
     </nav>
 
     <div class="sections">
@@ -102,32 +108,63 @@
           @if (s.items.length) {
             <ul class="docs">
               @for (m of s.items; track m.title) {
-                <li class="doc" [class.is-soon]="!m.href">
+                <li class="doc" [class.is-soon]="!m.href || locked(m)" [class.is-new]="!!m.releaseAt && !locked(m) && !!m.href">
                   <span class="doc__kind" [attr.data-kind]="m.kind">{{ m.kind }}</span>
-                  <span class="doc__title">{{ m.title }}</span>
+                  <span class="doc__title">{{ docTitle(m) }}</span>
                   <span class="doc__desc">{{ m.desc }}</span>
-                  @if (m.href && (m.version || m.updated || m.size)) {
+                  @if (m.href && !locked(m) && (m.version || m.updated || m.size)) {
                     <span class="doc__meta">
                       @if (m.version) { <span>v{{ m.version }}</span> }
                       @if (m.updated) { <span>{{ fmtShort(m.updated) }}</span> }
                       @if (m.size) { <span>{{ m.size }}</span> }
                     </span>
                   }
-                  @if (m.href && m.href.startsWith('/game/')) {
+                  @if (locked(m)) {
+                    <span class="doc__act doc__act--soon doc__act--lock">Se libera el {{ fmt(m.releaseAt!, true) }} a las {{ fmtTime(m.releaseAt!) }}</span>
+                  } @else if (m.href && m.href.startsWith('/game/')) {
                     <a class="doc__act" [routerLink]="m.href">{{ actionLabel(m) }} <span aria-hidden="true">→</span></a>
                   } @else if (m.href) {
                     <a class="doc__act" [href]="m.href"
-                       [attr.target]="isExternal(m) ? '_blank' : null"
-                       [attr.rel]="isExternal(m) ? 'noopener' : null"
-                       [attr.download]="m.kind === 'PDF' || m.kind === 'ZIP' ? '' : null">
+                       [attr.target]="isExternal(m) || m.kind === 'PDF' ? '_blank' : null"
+                       [attr.rel]="isExternal(m) || m.kind === 'PDF' ? 'noopener' : null"
+                       [attr.download]="m.kind === 'ZIP' || m.kind === 'CAD' ? '' : null">
                       {{ actionLabel(m) }} <span aria-hidden="true">→</span><span class="sr"> — {{ m.title }}</span>
                     </a>
                   } @else {
-                    <span class="doc__act doc__act--soon">Próximamente</span>
+                    <span class="doc__act doc__act--soon">{{ m.note ?? 'Próximamente' }}</span>
                   }
                 </li>
               }
             </ul>
+          } @else if (s.id === 'registro') {
+            @if (regState() === 'done' || regState() === 'already') {
+              <div class="reg-done" role="status">
+                <p><b>{{ regState() === 'done' ? '¡Listo, recibimos tu registro!' : 'Ese equipo ya tiene un registro en revisión.' }}</b></p>
+                <p>Revisaremos los datos y enviaremos el código del Q&amp;A al correo del mentor. El Q&amp;A abre el {{ fmt(milestones()[1].at) }} a las {{ fmtTime(milestones()[1].at) }}.</p>
+              </div>
+            } @else {
+              <form class="reg" (submit)="register($event)" novalidate>
+                <label class="rf"><span>Número de equipo FIRST *</span>
+                  <input type="text" inputmode="numeric" maxlength="6" [value]="reg.number()" (input)="reg.number.set($any($event.target).value)" /></label>
+                <label class="rf"><span>Nombre del equipo *</span>
+                  <input type="text" maxlength="80" [value]="reg.team_name()" (input)="reg.team_name.set($any($event.target).value)" /></label>
+                <label class="rf"><span>Escuela o ciudad</span>
+                  <input type="text" maxlength="80" [value]="reg.city()" (input)="reg.city.set($any($event.target).value)" /></label>
+                <label class="rf"><span>Nombre del mentor responsable *</span>
+                  <input type="text" maxlength="80" autocomplete="name" [value]="reg.mentor_name()" (input)="reg.mentor_name.set($any($event.target).value)" /></label>
+                <label class="rf"><span>Correo del mentor *</span>
+                  <input type="email" maxlength="120" autocomplete="email" [value]="reg.mentor_email()" (input)="reg.mentor_email.set($any($event.target).value)" /></label>
+                <label class="rf"><span>Teléfono / WhatsApp</span>
+                  <input type="tel" maxlength="30" autocomplete="tel" [value]="reg.phone()" (input)="reg.phone.set($any($event.target).value)" /></label>
+                <label class="rf rf--wide"><span>¿Algo que debamos saber?</span>
+                  <textarea rows="3" maxlength="400" [value]="reg.notes()" (input)="reg.notes.set($any($event.target).value)"></textarea></label>
+                @if (regError()) { <p class="reg-err rf--wide" role="alert">{{ regError() }}</p> }
+                <div class="rf--wide reg-foot">
+                  <button type="submit" class="reg-btn" [disabled]="!regValid() || regState() === 'sending'">{{ regState() === 'sending' ? 'Enviando…' : 'Registrar equipo' }}</button>
+                  <span>El código del Q&amp;A llega al correo del mentor cuando aprobemos el registro.</span>
+                </div>
+              </form>
+            }
           } @else {
             <p class="sec__empty">{{ s.empty }}</p>
           }

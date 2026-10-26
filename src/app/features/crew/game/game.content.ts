@@ -14,7 +14,7 @@ export const CHALLENGE = {
   summary:
     'Un reto offseason diseñado por TideCrew para seguir construyendo entre temporadas. ' +
     'Lo abrimos a cualquier equipo que quiera jugarlo: aquí vive todo lo que necesitas.',
-  contact: 'mariana.gomezb@tec.mx',
+  contact: 'santi.arzate@tec.mx',
 };
 
 /** Labels for the shared milestones (dates live in landing.content.ts → MILESTONES). */
@@ -35,7 +35,17 @@ export interface Material {
   updated?: string;  // 'YYYY-MM-DD'
   version?: string;
   size?: string;     // '2.4 MB'
+  /** ISO time before which the link stays locked (spoiler-free until Kickoff). */
+  releaseAt?: string;
+  /** Title shown once released (e.g. with the game's name). */
+  revealTitle?: string;
+  /** Short label shown instead of "Próximamente" when there's no link here. */
+  note?: string;
 }
+
+/** Kickoff: the manual, the drawings and the game's name go public at this time. */
+export const RELEASE_AT = '2026-10-26T16:15:00-06:00';
+export const GAME_NAME = 'FROZEN BLITZ';
 
 export interface Section {
   id: string;
@@ -51,8 +61,18 @@ export const SECTIONS: Section[] = [
     title: 'Manual del juego',
     intro: 'Reglas, puntuación, campo y robot. Si algo no está en el manual, pregúntalo en la sección de preguntas.',
     items: [
-      { title: 'Manual de TideChallenge', desc: 'El documento completo del reto.', kind: 'PDF' },
-      { title: 'Resumen del juego', desc: 'Una página para explicar el reto a tu equipo en cinco minutos.', kind: 'PDF' },
+      {
+        title: 'Manual del juego', revealTitle: 'Manual de FROZEN BLITZ', kind: 'PDF',
+        desc: 'Juego, arena, reglas de robot, inspección y torneo. 105 páginas, en inglés.',
+        href: '/docs/tidechallenge/frozen-blitz-manual-v1.4-28910b62.pdf', version: '1.4', updated: '2026-10-26', size: '4.7 MB',
+        releaseAt: RELEASE_AT,
+      },
+      {
+        title: 'Resumen del juego', revealTitle: 'FROZEN BLITZ en una página', kind: 'PDF',
+        desc: 'Una página para explicar el reto a tu equipo en cinco minutos: campo, puntuación y reglas clave. En inglés.',
+        href: '/docs/tidechallenge/frozen-blitz-one-pager-28910b62.pdf', updated: '2026-10-26', size: '0.8 MB',
+        releaseAt: RELEASE_AT,
+      },
     ],
   },
   {
@@ -60,8 +80,18 @@ export const SECTIONS: Section[] = [
     title: 'Campo y elementos',
     intro: 'Todo lo necesario para construir una réplica del campo en tu taller.',
     items: [
-      { title: 'Planos del campo', desc: 'Dimensiones y vistas acotadas.', kind: 'PDF' },
-      { title: 'CAD del campo', desc: 'Modelo completo para diseñar alrededor de él.', kind: 'CAD' },
+      {
+        title: 'Planos del campo', kind: 'PDF',
+        desc: 'Las 13 láminas del campo con sus cotas (FB-00 a FB-12). Si algo difiere del CAD, manda el CAD.',
+        href: '/docs/tidechallenge/frozen-blitz-field-drawings-v1.4-28910b62.pdf', version: '1.4', updated: '2026-10-26', size: '4.2 MB',
+        releaseAt: RELEASE_AT,
+      },
+      {
+        title: 'CAD del campo', kind: 'CAD',
+        desc: 'El ensamble completo del campo en STEP (AP214), listo para SolidWorks, Onshape, Fusion o Inventor. Si algo difiere de los planos, manda el CAD.',
+        href: '/docs/tidechallenge/frozen-blitz-field-cad-v1.4-28910b62.zip', version: '1.4', updated: '2026-10-26', size: '5.1 MB (ZIP)',
+        releaseAt: RELEASE_AT,
+      },
       { title: 'Lista de materiales', desc: 'Piezas y proveedores para armar los elementos de juego.', kind: 'PDF' },
     ],
   },
@@ -75,7 +105,7 @@ export const SECTIONS: Section[] = [
   {
     id: 'actualizaciones',
     title: 'Actualizaciones',
-    intro: 'Cambios y aclaraciones al manual. Las actualizaciones tienen prioridad sobre el manual.',
+    intro: 'Los Team Updates salen cada jueves antes de las 10:00 pm (hora de Guadalajara), desde el primer jueves después del Kickoff hasta el jueves previo al evento. Se anuncian en la comunidad de WhatsApp y quedan aquí.',
     items: [],
     empty: 'Todavía no hay actualizaciones. Cuando se publique la primera, aparecerá aquí con su fecha.',
   },
@@ -90,9 +120,7 @@ export const SECTIONS: Section[] = [
   {
     id: 'registro',
     title: 'Registro de equipos',
-    intro: 'Abierto a equipos FIRST de cualquier lugar.',
-    items: [
-      { title: 'Registrar mi equipo', desc: 'Nombre, número y contacto de un mentor.', kind: 'Formulario' },
-    ],
+    intro: 'Abierto a los equipos FIRST amigos de TideCrew. Registra a tu equipo y te enviaremos por correo el código para entrar al Q&A.',
+    items: [],
   },
 ];

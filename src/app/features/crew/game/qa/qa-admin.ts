@@ -2,15 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 import { HubNav } from '../hub-nav';
 import { QaCard } from './qa-card';
-import { QaService, QaStatus, Question, TeamRow, parseRules, sectionLabel } from './qa.service';
+import { QaService, QaStatus, Question, Registration, TeamRow, parseRules, sectionLabel } from './qa.service';
 
-type Tab = 'pending' | 'published' | 'teams' | 'settings';
+type Tab = 'pending' | 'published' | 'regs' | 'teams' | 'settings';
 
 /** Ready-made answers in the voice FIRST uses for questions the Q&A won't rule on. */
 const TEMPLATES = [
   { id: 'hypo', label: 'Hipotética', text: 'El Q&A no responde situaciones hipotéticas ni anticipa decisiones de arbitraje sobre jugadas específicas. En el evento, esas decisiones las toma el árbitro principal con base en el manual.' },
   { id: 'design', label: 'Diseño específico', text: 'El Q&A no evalúa diseños específicos de robot. Revisa las reglas citadas; la legalidad final la determina la inspección durante el evento.' },
-  { id: 'scope', label: 'Fuera de alcance', text: 'Esta pregunta está fuera del alcance del Q&A, que solo aclara el manual de TideChallenge. Para otros temas escríbenos a mariana.gomezb@tec.mx.' },
+  { id: 'scope', label: 'Fuera de alcance', text: 'Esta pregunta está fuera del alcance del Q&A, que solo aclara el manual de TideChallenge. Para otros temas del reto escríbenos a santi.arzate@tec.mx.' },
   { id: 'manual', label: 'Ya está en el manual', text: 'La respuesta está en el manual. Revisa la regla citada.' },
 ];
 
@@ -55,6 +55,11 @@ export class QaAdmin {
 
   protected readonly status = signal<QaStatus | null>(null);
 
+  // Registrations
+  protected readonly regs = signal<Registration[]>([]);
+  protected readonly newRegs = computed(() => this.regs().filter((r) => r.status === 'new'));
+  protected readonly approved = signal<{ number: string; code: string; email: string; mentor: string; team_name: string } | null>(null);
+
   constructor() {
     if (this.qa.admin()) this.loadAll();
   }
@@ -74,8 +79,8 @@ export class QaAdmin {
 
   private async loadAll() {
     try {
-      const [qs, teams, st] = await Promise.all([this.qa.queue(), this.qa.teams(), this.qa.status()]);
-      this.all.set(qs); this.teams.set(teams); this.status.set(st);
+      const [qs, teams, st, regs] = await Promise.all([this.qa.queue(), this.qa.teams(), this.qa.status(), this.qa.registrations()]);
+      this.all.set(qs); this.teams.set(teams); this.status.set(st); this.regs.set(regs);
       const first = this.pending()[0];
       if (first && this.selId() === null) this.select(first);
     } catch (e) { this.error.set((e as Error).message); }
@@ -136,6 +141,33 @@ export class QaAdmin {
   protected async toggleTeam(t: TeamRow) {
     await this.qa.setTeamActive(t.number, !t.active);
     this.teams.set(await this.qa.teams());
+  }
+
+  protected async approve(r: Registration) {
+    const res = await this.qa.review(r.id, true);
+    if (res.code) this.approved.set({ number: r.number, code: res.code, email: r.mentor_email, mentor: r.mentor_name, team_name: r.team_name });
+    const [regs, teams] = await Promise.all([this.qa.registrations(), this.qa.teams()]);
+    this.regs.set(regs); this.teams.set(teams);
+  }
+
+  protected async reject(r: Registration) {
+    if (!confirm(`¿Rechazar el registro del equipo ${r.number}?`)) return;
+    await this.qa.review(r.id, false);
+    this.regs.set(await this.qa.registrations());
+  }
+
+  /** A ready-to-send email with the team's code. */
+  protected codeMail(a: { number: string; code: string; email: string; mentor: string; team_name: string }) {
+    const subject = `TideChallenge · Código del Q&A para el equipo ${a.number}`;
+    const body =
+      `Hola ${a.mentor}:\n\n` +
+      `¡Gracias por registrar a ${a.team_name} (${a.number}) en TideChallenge!\n\n` +
+      `Con estos datos pueden entrar al Q&A oficial de FROZEN BLITZ en https://tidecrew.co/game/qa\n\n` +
+      `   Número de equipo: ${a.number}\n   Código: ${a.code}\n\n` +
+      `El Q&A abre el viernes 30 de octubre a las 4:15 pm (hora de Guadalajara). Una pregunta por envío, citando la regla del manual.\n\n` +
+      `Manual, planos y actualizaciones: https://tidecrew.co/game\n\n` +
+      `Ride the tide,\nTideCrew · Game Design Team`;
+    return `mailto:${a.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   protected copy(text: string) { navigator.clipboard?.writeText(text).catch(() => undefined); }

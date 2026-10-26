@@ -161,3 +161,26 @@ a:focus-visible { outline: 2px solid var(--tc-crest); outline-offset: 3px; }
   .marq__track { flex-wrap: wrap; width: auto; }
   .marq__item ~ .marq__item, .marq__mk { display: none; }
 }
+
+/* ── Kickoff reveal ──────────────────────────────────────────── */
+.reveal { display: grid; gap: .6rem; margin-bottom: 1.6rem; }
+.reveal__logo { width: min(420px, 80vw); height: auto; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .35)); animation: pop 1.1s cubic-bezier(.2, 1.4, .3, 1) both .2s; }
+.reveal__k { margin: 0; font: 600 1.05rem/1.3 var(--tc-font-body); color: var(--tc-foam); }
+@keyframes pop { from { opacity: 0; transform: scale(.7) rotate(-6deg); } to { opacity: 1; transform: none; } }
+.doc.is-new { border-color: color-mix(in srgb, var(--tc-pacific) 55%, transparent); box-shadow: 0 16px 36px -26px var(--tc-pacific); }
+.doc__act--lock { color: #8a4220; font-weight: 600; }
+
+/* ── Registration ────────────────────────────────────────────── */
+.reg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1rem; margin-top: 1.6rem; padding: clamp(1.2rem, 2.4vw, 1.8rem); border-radius: var(--tc-radius-card); background: #fff; border: 1px solid var(--line); max-width: 860px; }
+.rf { display: grid; gap: .4rem; font: 600 .86rem/1.2 var(--tc-font-body); }
+.rf--wide { grid-column: 1 / -1; }
+.rf input, .rf textarea { width: 100%; padding: .75rem .85rem; border-radius: 8px; border: 1.5px solid var(--line); background: #fff; color: var(--tc-night); font: 400 .98rem/1.4 var(--tc-font-body); }
+.rf input:focus, .rf textarea:focus { outline: none; border-color: var(--tc-pacific); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc-pacific) 18%, transparent); }
+.reg-foot { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.2rem; font: 400 .86rem/1.4 var(--tc-font-body); color: var(--muted); }
+.reg-btn { min-height: 50px; padding: 0 1.4rem; border: 0; border-radius: 4px; background: var(--tc-pacific); color: var(--tc-foam); font: 600 1rem/1 var(--tc-font-body); cursor: pointer; transition: background-color .25s, opacity .25s; }
+.reg-btn:hover:not(:disabled) { background: var(--tc-night); }
+.reg-btn:disabled { opacity: .45; cursor: not-allowed; }
+.reg-err { margin: 0; padding: .7rem .8rem; border-radius: 6px; background: color-mix(in srgb, var(--tc-danger) 10%, #fff); color: #9c1a1c; font: 500 .9rem/1.4 var(--tc-font-body); }
+.reg-done { margin-top: 1.6rem; padding: 1.2rem 1.4rem; border-radius: var(--tc-radius-card); background: color-mix(in srgb, var(--tc-success) 10%, #fff); max-width: 860px; }
+.reg-done p { margin: 0 0 .4rem; }
+@media (max-width: 640px) { .reg { grid-template-columns: minmax(0, 1fr); } }

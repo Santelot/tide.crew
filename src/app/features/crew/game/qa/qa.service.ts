@@ -10,11 +10,12 @@ import { SupabaseService } from '../../../../core/supabase.service';
 export type Section = 'general' | 'juego' | 'robot' | 'campo' | 'torneo';
 export type Status = 'pending' | 'answered' | 'declined';
 
+/** Mapped to the FROZEN BLITZ manual's sections. */
 export const SECTIONS: { id: Section; label: string }[] = [
-  { id: 'juego', label: 'Juego y puntuación' },
-  { id: 'robot', label: 'Robot' },
-  { id: 'campo', label: 'Campo y elementos' },
-  { id: 'torneo', label: 'Torneo' },
+  { id: 'campo', label: 'Arena (sec. 4)' },
+  { id: 'juego', label: 'Juego y reglas G (sec. 5–6)' },
+  { id: 'robot', label: 'Robot, reglas R (sec. 7)' },
+  { id: 'torneo', label: 'Inspección y torneo (sec. 8–9)' },
   { id: 'general', label: 'General' },
 ];
 export const sectionLabel = (id: string) => SECTIONS.find((s) => s.id === id)?.label ?? id;
@@ -41,6 +42,10 @@ export interface TeamSession { token: string; number: string; name: string; expi
 export interface AdminSession { token: string; username: string; expires_at: string; }
 /** Logins return their failures (so attempts get recorded) instead of raising. */
 interface LoginError { error?: string; hint?: string; }
+export interface Registration {
+  id: number; number: string; team_name: string; city: string; mentor_name: string; mentor_email: string;
+  phone: string; notes: string; status: 'new' | 'approved' | 'rejected'; created_at: string; reviewed_at: string | null;
+}
 export interface TeamRow { number: string; name: string; active: boolean; created_at: string; questions: number; last_login: string | null; }
 
 const TEAM_KEY = 'tc-qa-team';
@@ -127,6 +132,22 @@ export class QaService {
     return this.call<{ number: string; code: string }>('qa_admin_upsert_team', { p_token: this.at, p_number: number, p_name: name, p_code: code || null });
   }
   setTeamActive(number: string, active: boolean) { return this.call<void>('qa_admin_team_active', { p_token: this.at, p_number: number, p_active: active }); }
+  registrations() { return this.call<Registration[]>('qa_admin_registrations', { p_token: this.at }); }
+  review(id: number, approve: boolean) {
+    return this.call<{ code?: string; number?: string; email?: string; mentor?: string; team_name?: string; rejected?: boolean }>(
+      'qa_admin_review', { p_token: this.at, p_id: id, p_approve: approve });
+  }
+
+  /** Public: a team asks to join. Errors come back as data so the form can show them. */
+  async register(r: { number: string; team_name: string; city: string; mentor_name: string; mentor_email: string; phone: string; notes: string }) {
+    const res = await this.call<{ ok?: boolean; already?: boolean } & LoginError>('qa_register', {
+      p_number: r.number, p_team_name: r.team_name, p_city: r.city, p_mentor_name: r.mentor_name,
+      p_mentor_email: r.mentor_email, p_phone: r.phone, p_notes: r.notes,
+    });
+    if (res.error) throw new Error(res.hint ?? friendly(res.error));
+    return res;
+  }
+
   setMode(mode: 'auto' | 'open' | 'closed') { return this.call<QaStatus>('qa_admin_set_mode', { p_token: this.at, p_mode: mode }); }
 }
 

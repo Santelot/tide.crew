@@ -66,7 +66,7 @@ create table if not exists qa.settings (
 );
 insert into qa.settings (key, value) values
   ('mode', 'auto'),                                 -- auto | open | closed
-  ('opens_at', '2026-10-30T09:00:00-06:00'),
+  ('opens_at', '2026-10-30T16:15:00-06:00'),
   ('closes_at', '2026-11-20T23:59:00-06:00')
 on conflict (key) do nothing;
 
@@ -408,3 +408,77 @@ begin
     execute format('grant execute on function public.%s to anon, authenticated', f);
   end loop;
 end $$;
+
+-- ═══ Team registration (added for Kickoff, 2026-10-26) ═══════════════════════
+-- Teams ask to join from /game#registro; the Game Design Team approves them in
+-- /game/admin, which creates the team and returns its code once.
+create table if not exists qa.registrations (
+  id bigint generated always as identity primary key,
+  number text not null check (number ~ '^[0-9]{1,6}$'),
+  team_name text not null check (char_length(team_name) between 2 and 80),
+  city text not null default '' check (char_length(city) <= 80),
+  mentor_name text not null check (char_length(mentor_name) between 2 and 80),
+  mentor_email text not null check (mentor_email ~* '^[^@\s]+@[^@\s]+\.[^@\s]{2,}$' and char_length(mentor_email) <= 120),
+  phone text not null default '' check (char_length(phone) <= 30),
+  notes text not null default '' check (char_length(notes) <= 400),
+  status text not null default 'new' check (status in ('new', 'approved', 'rejected')),
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz
+);
+create index if not exists registrations_status on qa.registrations (status, created_at desc);
+alter table qa.registrations enable row level security;
+
+create or replace function public.qa_register(p_number text, p_team_name text, p_city text, p_mentor_name text, p_mentor_email text, p_phone text default '', p_notes text default '')
+returns json language plpgsql security definer set search_path = qa, public as $$
+declare n text := trim(coalesce(p_number, ''));
+begin
+  if n !~ '^[0-9]{1,6}$' then return json_build_object('error', 'NUMBER', 'hint', 'Escribe el número de equipo FIRST (solo dígitos).'); end if;
+  if exists (select 1 from qa.teams where number = n and active) then
+    return json_build_object('error', 'EXISTS', 'hint', 'Ese equipo ya está registrado. Si perdiste el código, escríbenos.');
+  end if;
+  if exists (select 1 from qa.registrations where number = n and status = 'new') then
+    return json_build_object('ok', true, 'already', true);
+  end if;
+  if (select count(*) from qa.registrations where created_at > now() - interval '1 hour') >= 40 then
+    return json_build_object('error', 'BUSY', 'hint', 'Recibimos muchos registros en este momento. Intenta en unos minutos.');
+  end if;
+  insert into qa.registrations (number, team_name, city, mentor_name, mentor_email, phone, notes)
+  values (n, trim(p_team_name), trim(coalesce(p_city, '')), trim(p_mentor_name), lower(trim(p_mentor_email)),
+          trim(coalesce(p_phone, '')), trim(coalesce(p_notes, '')));
+  return json_build_object('ok', true);
+exception when check_violation then
+  return json_build_object('error', 'INVALID', 'hint', 'Revisa los datos: nombre del equipo, mentor y un correo válido son obligatorios.');
+end $$;
+
+create or replace function public.qa_admin_registrations(p_token uuid) returns json
+language plpgsql stable security definer set search_path = qa, public as $$
+begin
+  perform qa._admin(p_token);
+  return coalesce((select json_agg(row_to_json(r) order by (r.status = 'new') desc, r.created_at desc) from qa.registrations r), '[]'::json);
+end $$;
+
+create or replace function public.qa_admin_review(p_token uuid, p_id bigint, p_approve boolean) returns json
+language plpgsql security definer set search_path = qa, extensions, public as $$
+declare r qa.registrations; res json;
+begin
+  perform qa._admin(p_token);
+  select * into r from qa.registrations where id = p_id;
+  if r.id is null then raise exception 'NOT_FOUND'; end if;
+  if p_approve then
+    res := public.qa_admin_upsert_team(p_token, r.number, r.team_name, null);
+    update qa.registrations set status = 'approved', reviewed_at = now() where id = p_id;
+    return (res::jsonb || jsonb_build_object('email', r.mentor_email, 'mentor', r.mentor_name, 'team_name', r.team_name))::json;
+  end if;
+  update qa.registrations set status = 'rejected', reviewed_at = now() where id = p_id;
+  return json_build_object('rejected', true);
+end $$;
+
+revoke all on function public.qa_register(text,text,text,text,text,text,text) from public;
+revoke all on function public.qa_admin_registrations(uuid) from public;
+revoke all on function public.qa_admin_review(uuid,bigint,boolean) from public;
+grant execute on function public.qa_register(text,text,text,text,text,text,text) to anon, authenticated;
+grant execute on function public.qa_admin_registrations(uuid) to anon, authenticated;
+grant execute on function public.qa_admin_review(uuid,bigint,boolean) to anon, authenticated;
+
+-- Manual 1.7: the Q&A opens Friday, October 30, 2026, at 4:15 pm (UTC-6).
+update qa.settings set value = '2026-10-30T16:15:00-06:00' where key = 'opens_at';

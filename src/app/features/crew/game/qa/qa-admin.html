@@ -14,6 +14,7 @@
     <nav class="wrap tabs" aria-label="Secciones del panel">
       <button type="button" [class.on]="tab() === 'pending'" (click)="tab.set('pending')">Por responder <b>{{ pending().length }}</b></button>
       <button type="button" [class.on]="tab() === 'published'" (click)="tab.set('published')">Publicadas <b>{{ published().length }}</b></button>
+      <button type="button" [class.on]="tab() === 'regs'" (click)="tab.set('regs')">Registros <b>{{ newRegs().length }}</b></button>
       <button type="button" [class.on]="tab() === 'teams'" (click)="tab.set('teams')">Equipos <b>{{ teams().length }}</b></button>
       <button type="button" [class.on]="tab() === 'settings'" (click)="tab.set('settings')">Ajustes</button>
     </nav>
@@ -99,6 +100,45 @@
         } @else {
           <section class="editor"><p class="muted pad">Elige una pregunta de la lista.</p></section>
         }
+      </div>
+    }
+
+    @if (tab() === 'regs') {
+      @if (approved(); as a) {
+        <div class="panel issued-big" role="status">
+          <p>Equipo <b>{{ a.number }}</b> · {{ a.team_name }} aprobado. Su código:</p>
+          <code>{{ a.code }}</code>
+          <div class="actions">
+            <a class="btn btn--inline" [href]="codeMail(a)">Enviar código a {{ a.email }}</a>
+            <button type="button" class="link" (click)="copy('Equipo ' + a.number + ' · Código ' + a.code)">Copiar</button>
+            <button type="button" class="link" (click)="approved.set(null)">Cerrar</button>
+          </div>
+          <p class="muted">El código solo se muestra ahora. Si se pierde, genera uno nuevo desde Equipos.</p>
+        </div>
+      }
+      <div class="panel">
+        <h3 class="panel__t">Solicitudes de registro</h3>
+        <table class="tbl">
+          <thead><tr><th>Equipo</th><th>Mentor</th><th>Recibido</th><th></th></tr></thead>
+          <tbody>
+            @for (r of regs(); track r.id) {
+              <tr [class.off]="r.status !== 'new'">
+                <td><b>{{ r.number }}</b> · {{ r.team_name }}@if (r.city) { <span class="muted"> · {{ r.city }}</span> }
+                  @if (r.notes) { <div class="muted small">“{{ r.notes }}”</div> }</td>
+                <td>{{ r.mentor_name }}<div class="muted small">{{ r.mentor_email }}@if (r.phone) { · {{ r.phone }} }</div></td>
+                <td>{{ fmt(r.created_at) }}</td>
+                <td class="row-act">
+                  @if (r.status === 'new') {
+                    <button type="button" class="btn btn--inline btn--sm" (click)="approve(r)">Aprobar</button>
+                    <button type="button" class="link" (click)="reject(r)">Rechazar</button>
+                  } @else { <span class="muted">{{ r.status === 'approved' ? 'Aprobado' : 'Rechazado' }}</span> }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="muted">Todavía no hay solicitudes. Llegan desde /game#registro.</td></tr>
+            }
+          </tbody>
+        </table>
       </div>
     }
 

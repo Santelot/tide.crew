@@ -7,7 +7,8 @@ import { Mark } from '../../../shared/mark/mark';
 import { HubNav } from './hub-nav';
 import { MotionService, ScrollTrigger, gsap } from '../../../shared/motion/motion.service';
 import { MILESTONES } from '../landing.content';
-import { CHALLENGE, MILESTONE_LABELS, Material, SECTIONS } from './game.content';
+import { CHALLENGE, GAME_NAME, MILESTONE_LABELS, Material, RELEASE_AT, SECTIONS } from './game.content';
+import { QaService } from './qa/qa.service';
 
 const pad = (n: number) => String(Math.max(0, n)).padStart(2, '0');
 
@@ -22,15 +23,27 @@ export class Game implements AfterViewInit, OnDestroy {
   private readonly zone = inject(NgZone);
   private readonly host = inject(ElementRef<HTMLElement>);
   protected readonly motion = inject(MotionService);
+  private readonly qa = inject(QaService);
+  protected readonly gameName = GAME_NAME;
 
   protected readonly c = CHALLENGE;
   protected readonly sections = SECTIONS;
   protected readonly labels = MILESTONE_LABELS;
   protected readonly active = signal(SECTIONS[0]?.id ?? '');
   private readonly now = signal(Date.now());
+  /** Kickoff has happened: the game's name and documents are public. */
+  protected readonly released = computed(() => this.now() >= Date.parse(RELEASE_AT));
+
+  // Team registration form
+  protected readonly reg = { number: signal(''), team_name: signal(''), city: signal(''), mentor_name: signal(''), mentor_email: signal(''), phone: signal(''), notes: signal('') };
+  protected readonly regState = signal<'idle' | 'sending' | 'done' | 'already'>('idle');
+  protected readonly regError = signal('');
+  protected readonly regValid = computed(() =>
+    /^\d{1,6}$/.test(this.reg.number().trim()) && this.reg.team_name().trim().length >= 2 &&
+    this.reg.mentor_name().trim().length >= 2 && /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(this.reg.mentor_email().trim()));
 
   protected readonly items = SECTIONS.flatMap((s) => s.items);
-  protected readonly published = this.items.filter((i) => !!i.href).length;
+  protected readonly published = computed(() => this.items.filter((i) => !!i.href && !(i.releaseAt && this.now() < Date.parse(i.releaseAt))).length);
   protected readonly total = this.items.length;
 
   protected readonly milestones = computed(() => {
@@ -132,10 +145,36 @@ export class Game implements AfterViewInit, OnDestroy {
     }).format(new Date(iso));
   }
 
+  protected fmtTime(iso: string) {
+    return new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Mexico_City' })
+      .format(new Date(iso)).replace(/\s?a\.?\s?m\.?/i, ' am').replace(/\s?p\.?\s?m\.?/i, ' pm');
+  }
+
   protected fmtShort(d?: string) {
     if (!d) return '';
     return new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
       .format(new Date(d + 'T12:00:00Z')).replace('.', '');
+  }
+
+  protected locked(m: Material) { return !!m.releaseAt && this.now() < Date.parse(m.releaseAt); }
+  protected docTitle(m: Material) { return m.revealTitle && !this.locked(m) ? m.revealTitle : m.title; }
+
+  protected async register(ev: Event) {
+    ev.preventDefault();
+    if (!this.regValid() || this.regState() === 'sending') return;
+    this.regState.set('sending');
+    this.regError.set('');
+    try {
+      const r = this.reg;
+      const res = await this.qa.register({
+        number: r.number().trim(), team_name: r.team_name().trim(), city: r.city().trim(), mentor_name: r.mentor_name().trim(),
+        mentor_email: r.mentor_email().trim(), phone: r.phone().trim(), notes: r.notes().trim(),
+      });
+      this.regState.set(res.already ? 'already' : 'done');
+    } catch (e) {
+      this.regError.set((e as Error).message);
+      this.regState.set('idle');
+    }
   }
 
   protected isExternal(m: Material) { return !!m.href && /^https?:/.test(m.href); }
@@ -144,7 +183,9 @@ export class Game implements AfterViewInit, OnDestroy {
     switch (m.kind) {
       case 'Video': return 'Ver video';
       case 'Formulario': return 'Abrir';
-      case 'Enlace': case 'CAD': return 'Abrir';
+      case 'Enlace': return 'Abrir';
+      case 'CAD': return 'Descargar STEP';
+      case 'PDF': return 'Abrir PDF';
       default: return 'Descargar';
     }
   }
