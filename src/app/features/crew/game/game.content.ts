@@ -92,7 +92,6 @@ export const SECTIONS: Section[] = [
         href: '/docs/tidechallenge/frozen-blitz-field-cad-v1.4-28910b62.zip', version: '1.4', updated: '2026-10-26', size: '5.1 MB (ZIP)',
         releaseAt: RELEASE_AT,
       },
-      { title: 'Lista de materiales', desc: 'Piezas y proveedores para armar los elementos de juego.', kind: 'PDF' },
     ],
   },
   {
