@@ -135,7 +135,7 @@
                   }
                   @if (locked(m)) {
                     <span class="doc__act doc__act--soon doc__act--lock">Se libera el {{ fmt(m.releaseAt!, true) }} a las {{ fmtTime(m.releaseAt!) }}</span>
-                  } @else if (m.href && m.href.startsWith('/game/')) {
+                  } @else if (m.href && m.href.startsWith('/game/') && m.kind !== 'Web') {
                     <a class="doc__act" [routerLink]="m.href">{{ actionLabel(m) }} <span aria-hidden="true">→</span></a>
                   } @else if (m.kind === 'Video' && yt(m.href)) {
                     <a class="doc__act" [href]="m.href" (click)="openVideo(m, $event)">{{ actionLabel(m) }} <span aria-hidden="true">→</span><span class="sr"> — {{ m.title }}</span></a>

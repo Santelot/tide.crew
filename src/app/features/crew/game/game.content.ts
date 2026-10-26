@@ -25,7 +25,7 @@ export const MILESTONE_LABELS: Record<string, { label: string; hint: string }> =
   event: { label: 'Día del reto', hint: 'A la cancha.' },
 };
 
-export type Kind = 'PDF' | 'CAD' | 'Video' | 'Enlace' | 'Formulario' | 'ZIP';
+export type Kind = 'PDF' | 'CAD' | 'Video' | 'Enlace' | 'Formulario' | 'ZIP' | 'Web';
 
 export interface Material {
   title: string;
@@ -65,6 +65,12 @@ export const SECTIONS: Section[] = [
         title: 'Manual del juego', revealTitle: 'Manual de FROZEN BLITZ', kind: 'PDF',
         desc: 'Juego, arena, reglas de robot, inspección y torneo. 105 páginas, en inglés.',
         href: '/docs/tidechallenge/frozen-blitz-manual-v1.4-28910b62.pdf', version: '1.4', updated: '2026-10-26', size: '4.7 MB',
+        releaseAt: RELEASE_AT,
+      },
+      {
+        title: 'Manual web', kind: 'Web',
+        desc: 'El mismo manual, hecho para leerse en el celular: buscador de reglas, índice, modo oscuro y calculadora de puntaje.',
+        href: '/game/manual', version: '1.4', updated: '2026-10-26',
         releaseAt: RELEASE_AT,
       },
       {
