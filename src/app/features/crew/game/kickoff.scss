@@ -1,0 +1,157 @@
+:host { display: contents; }
+
+.ko {
+  --night: #111921; --undertow: #00434A; --pacific: #00A6B8; --crest: #00CFE6; --foam: #FFFBFE; --coral: #FFAD85;
+  position: fixed; inset: 0; z-index: 1000; overflow: hidden; color: var(--foam);
+  background: radial-gradient(120% 90% at 50% 110%, #06323A 0%, var(--night) 62%);
+  animation: ko-in .9s ease both;
+  cursor: default;
+}
+@keyframes ko-in { from { opacity: 0; } }
+
+/* ── Countdown ─────────────────────────────────────────────────────── */
+.ko__count {
+  position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: .4rem;
+  text-align: center; transition: opacity .35s ease, transform .6s cubic-bezier(.6, 0, .2, 1);
+}
+.ko__k { margin: 0; font: 600 clamp(.72rem, 1.6vw, .9rem)/1 var(--tc-font-body); letter-spacing: .22em; text-transform: uppercase; color: var(--crest); }
+.ko__sub { margin: .4rem 0 0; font: 500 clamp(.95rem, 2.2vw, 1.2rem)/1.3 var(--tc-font-editorial); color: rgba(255, 251, 254, .72); }
+.ko__n {
+  display: block; font-family: var(--tc-font-display); font-style: italic; line-height: .82;
+  font-size: min(46vw, 54vh); letter-spacing: -.02em; padding-right: .06em;
+  text-shadow: 0 0 60px rgba(0, 207, 230, .35), 0 24px 60px rgba(0, 0, 0, .45);
+  animation: ko-n 1s cubic-bezier(.2, .9, .25, 1) both;
+}
+@keyframes ko-n {
+  0% { opacity: 0; transform: scale(1.35) translateY(-4%); filter: blur(14px); }
+  22% { opacity: 1; transform: none; filter: blur(0); }
+  80% { opacity: 1; transform: scale(.97); }
+  100% { opacity: .0; transform: scale(.9) translateY(6%); filter: blur(6px); }
+}
+
+/* ── Water rising behind the numbers ───────────────────────────────── */
+.ko__water {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 1;
+  height: calc(var(--w, 0) * 46% + 4%);
+  background: linear-gradient(180deg, var(--pacific) 0%, var(--undertow) 70%, #06323A 100%);
+}
+.ko__crest {
+  position: absolute; left: 0; bottom: calc(100% - 1px); width: 200%; height: clamp(26px, 5vh, 46px);
+  fill: var(--pacific); animation: ko-surf 3.2s linear infinite;
+}
+@keyframes ko-surf { to { transform: translateX(-50%); } }
+
+/* ── The wave ──────────────────────────────────────────────────────── */
+.ko__wave {
+  position: absolute; left: -5%; right: -5%; top: 0; height: 150%; z-index: 3;
+  transform: translateY(102vh); pointer-events: none;
+}
+.ko__wave-top { display: block; width: 100%; height: clamp(70px, 14vh, 140px); margin-bottom: -2px; }
+.ko__wave-top path { fill: var(--crest); }
+.ko__wave-top path.f { fill: var(--foam); opacity: .9; }
+.ko__wave-body { height: calc(100% - clamp(70px, 14vh, 140px)); background: linear-gradient(180deg, var(--crest) 0%, var(--pacific) 22%, var(--undertow) 60%, #072a30 100%); }
+
+[data-phase='wave'] .ko__wave { animation: ko-sweep 1.15s cubic-bezier(.55, .05, .35, 1) both; }
+[data-phase='reveal'] .ko__wave, [data-phase='leave'] .ko__wave { transform: translateY(-160vh); }
+@keyframes ko-sweep {
+  0% { transform: translateY(102vh) skewY(-2deg); }
+  100% { transform: translateY(-160vh) skewY(1deg); }
+}
+[data-phase='wave'] .ko__count, [data-phase='reveal'] .ko__count, [data-phase='leave'] .ko__count { opacity: 0; transform: translateY(-14vh); }
+[data-phase='wave'] .ko__water { height: 100%; transition: height .6s cubic-bezier(.6, 0, .3, 1); }
+[data-phase='reveal'] .ko__water, [data-phase='leave'] .ko__water { opacity: 0; }
+
+/* ── Reveal ────────────────────────────────────────────────────────── */
+.ko__reveal {
+  position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: clamp(.9rem, 2.4vh, 1.5rem);
+  padding: 5rem 1.25rem 3rem; text-align: center; opacity: 0; visibility: hidden;
+  background:
+    radial-gradient(60% 50% at 50% 46%, rgba(0, 207, 230, .28) 0%, transparent 70%),
+    linear-gradient(180deg, #072a30 0%, var(--undertow) 45%, #0A5560 100%);
+}
+[data-phase='wave'] .ko__reveal { visibility: visible; animation: ko-fade .5s ease .62s both; }
+[data-phase='reveal'] .ko__reveal, [data-phase='leave'] .ko__reveal { opacity: 1; visibility: visible; }
+@keyframes ko-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.ko__k--r { opacity: 0; }
+.ko__logo { position: relative; width: min(620px, 84vw); }
+.ko__logo img {
+  position: relative; z-index: 1; display: block; width: 100%; height: auto;
+  filter: drop-shadow(0 26px 40px rgba(0, 0, 0, .45)); opacity: 0;
+}
+.ko__line { margin: 0; font: 700 clamp(1.15rem, 3vw, 1.7rem)/1.2 var(--tc-font-title); opacity: 0; }
+.ko__act { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; opacity: 0; }
+.ko__btn {
+  display: inline-flex; align-items: center; height: 50px; padding: 0 1.5rem; border-radius: 3px; cursor: pointer;
+  border: 1.5px solid rgba(255, 251, 254, .55); background: transparent; color: var(--foam);
+  font: 600 1rem/1 var(--tc-font-body); text-decoration: none; transition: background-color .25s, color .25s, border-color .25s;
+}
+.ko__btn:hover { background: var(--foam); color: var(--night); border-color: var(--foam); }
+.ko__btn--solid { background: var(--crest); border-color: var(--crest); color: var(--night); }
+.ko__btn--solid:hover { background: var(--foam); border-color: var(--foam); }
+.ko__btn:focus-visible, .ko__x:focus-visible { outline: 2px solid var(--crest); outline-offset: 3px; }
+.ko__x {
+  position: absolute; top: 1.1rem; right: clamp(1rem, 4vw, 3rem); display: inline-flex; gap: .5rem; align-items: center;
+  border: 0; background: none; color: rgba(255, 251, 254, .7); font: 500 .9rem/1 var(--tc-font-body); cursor: pointer; padding: .6rem; opacity: 0;
+}
+.ko__x:hover { color: var(--foam); }
+
+/* the logo surfaces: rises out of the water, overshoots, then floats */
+[data-phase='reveal'] .ko__logo img, [data-phase='leave'] .ko__logo img {
+  animation: ko-surface 1.4s cubic-bezier(.18, 1.25, .35, 1) .05s both, ko-bob 4.2s ease-in-out 1.6s infinite;
+}
+@keyframes ko-surface {
+  0% { opacity: 0; transform: translateY(38%) scale(.82) rotate(-5deg); filter: blur(10px) drop-shadow(0 26px 40px rgba(0, 0, 0, .45)); }
+  45% { opacity: 1; filter: blur(0) drop-shadow(0 26px 40px rgba(0, 0, 0, .45)); }
+  100% { opacity: 1; transform: none; filter: drop-shadow(0 26px 40px rgba(0, 0, 0, .45)); }
+}
+@keyframes ko-bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2.2%) rotate(-1.2deg); } }
+
+[data-phase='reveal'] .ko__k--r, [data-phase='leave'] .ko__k--r { animation: ko-up .8s cubic-bezier(.2, .9, .25, 1) .25s both; }
+[data-phase='reveal'] .ko__line, [data-phase='leave'] .ko__line { animation: ko-up .9s cubic-bezier(.2, .9, .25, 1) .85s both; }
+[data-phase='reveal'] .ko__act, [data-phase='leave'] .ko__act { animation: ko-up .9s cubic-bezier(.2, .9, .25, 1) 1.1s both; }
+[data-phase='reveal'] .ko__x, [data-phase='leave'] .ko__x { animation: ko-fade .6s ease 1.6s both; }
+@keyframes ko-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+/* scoops burst out from behind the logo */
+.ko__burst { position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 0; }
+.ko__burst i { position: absolute; left: 0; top: 0; border-radius: 50%; opacity: 0; transform: translate(-50%, -50%) scale(0); box-shadow: inset -3px -4px 0 rgba(0, 0, 0, .18); }
+[data-phase='reveal'] .ko__burst i { animation: ko-burst 1.5s cubic-bezier(.15, .8, .3, 1) both; }
+@keyframes ko-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  15% { opacity: 1; }
+  70% { opacity: 1; transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--x) * 1.15), calc(-50% + var(--y) * 1.15 + 6vmin)) scale(.6); }
+}
+
+/* bubbles rising through the water */
+.ko__bubbles { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.ko__bubbles i {
+  position: absolute; bottom: -40px; border-radius: 50%; opacity: 0;
+  border: 1.5px solid rgba(255, 251, 254, .45); background: radial-gradient(circle at 32% 30%, rgba(255, 251, 254, .55) 0 18%, rgba(0, 207, 230, .08) 40%, transparent 70%);
+}
+[data-phase='reveal'] .ko__bubbles i, [data-phase='leave'] .ko__bubbles i { animation-name: ko-bubble; animation-timing-function: cubic-bezier(.4, 0, .7, 1); animation-iteration-count: infinite; animation-fill-mode: both; }
+@keyframes ko-bubble {
+  0% { opacity: 0; transform: translate(0, 0); }
+  12% { opacity: .9; }
+  50% { transform: translate(14px, -55vh); }
+  100% { opacity: 0; transform: translate(-10px, -112vh); }
+}
+
+/* ── Receding ──────────────────────────────────────────────────────── */
+[data-phase='leave'] { animation: ko-leave .95s cubic-bezier(.65, 0, .35, 1) both; }
+@keyframes ko-leave {
+  from { clip-path: inset(0 0 0 0); }
+  to { clip-path: inset(0 0 100% 0); }
+}
+
+@media (max-width: 560px) {
+  .ko__btn { height: 46px; padding: 0 1.1rem; font-size: .95rem; }
+  .ko__x { top: .6rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ko, .ko *, .ko *::before { animation-duration: .01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition: none !important; }
+  .ko__bubbles, .ko__burst, .ko__wave { display: none; }
+  [data-phase='leave'] { opacity: 0; }
+}

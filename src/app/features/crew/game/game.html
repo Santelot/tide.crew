@@ -1,5 +1,8 @@
 <tc-hub-nav here="hub" />
 <tc-ocean />
+@if (armed()) {
+  <tc-kickoff [at]="releaseMs" [offset]="offset" [manualHref]="manualHref" (done)="afterKickoff($event)" />
+}
 
 <!-- ═══ HERO — rising out of the deep ════════════════════════════════════ -->
 <header class="hero" #hero data-tone="dark" data-water>
@@ -19,8 +22,8 @@
 
   <div class="wrap hero__grid">
     <div class="hero__intro">
-      @if (released()) {
-        <div class="reveal" data-in>
+      @if (released() && !armed()) {
+        <div class="reveal">
           <img class="reveal__logo" src="/brand/frozen-blitz.webp" [alt]="gameName" width="900" height="539" />
           <p class="reveal__k">El juego de la temporada ya está aquí.</p>
         </div>

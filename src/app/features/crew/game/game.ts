@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Ocean } from '../../../shared/ocean/ocean';
 import { Mark } from '../../../shared/mark/mark';
 import { HubNav } from './hub-nav';
+import { Kickoff } from './kickoff';
 import { MotionService, ScrollTrigger, gsap } from '../../../shared/motion/motion.service';
 import { MILESTONES } from '../landing.content';
 import { CHALLENGE, GAME_NAME, MILESTONE_LABELS, Material, RELEASE_AT, SECTIONS } from './game.content';
@@ -15,7 +16,7 @@ const pad = (n: number) => String(Math.max(0, n)).padStart(2, '0');
 @Component({
   selector: 'app-game',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, Ocean, Mark, HubNav],
+  imports: [RouterLink, Ocean, Mark, HubNav, Kickoff],
   templateUrl: './game.html',
   styleUrl: './game.scss',
 })
@@ -30,9 +31,19 @@ export class Game implements AfterViewInit, OnDestroy {
   protected readonly sections = SECTIONS;
   protected readonly labels = MILESTONE_LABELS;
   protected readonly active = signal(SECTIONS[0]?.id ?? '');
-  private readonly now = signal(Date.now());
+  /**
+   * Rehearsal: /game?kickoff=ensayo shifts this page's clock so Kickoff happens ~13 s after load.
+   * Only affects the visitor's own browser.
+   */
+  protected readonly releaseMs = Date.parse(RELEASE_AT);
+  protected readonly offset = typeof location !== 'undefined' && new URLSearchParams(location.search).get('kickoff') === 'ensayo'
+    ? this.releaseMs - Date.now() - 13_000 : 0;
+  private readonly now = signal(Date.now() + this.offset);
   /** Kickoff has happened: the game's name and documents are public. */
-  protected readonly released = computed(() => this.now() >= Date.parse(RELEASE_AT));
+  protected readonly released = computed(() => this.now() >= this.releaseMs);
+  /** The visitor was here before Kickoff, so they get the show (see Kickoff). */
+  protected readonly armed = signal(this.now() < this.releaseMs);
+  protected readonly manualHref = SECTIONS.flatMap((s) => s.items).find((i) => i.kind === 'PDF' && i.href?.includes('manual'))?.href ?? '';
 
   // Team registration form
   protected readonly reg = { number: signal(''), team_name: signal(''), city: signal(''), mentor_name: signal(''), mentor_email: signal(''), phone: signal(''), notes: signal('') };
@@ -92,7 +103,7 @@ export class Game implements AfterViewInit, OnDestroy {
     if (ocean.ready) root.classList.add('ocean-on');
 
     this.zone.runOutsideAngular(() => {
-      this.clock = window.setInterval(() => this.now.set(Date.now()), 1000);
+      this.clock = window.setInterval(() => this.now.set(Date.now() + this.offset), 500);
       this.ctx = gsap.context(() => this.build(), root);
     });
 
@@ -132,6 +143,26 @@ export class Game implements AfterViewInit, OnDestroy {
     gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
       gsap.from(el, { y: 32, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
     });
+  }
+
+  /** After the Kickoff overlay: freshly released cards drop in as they come into view. */
+  protected afterKickoff(seeDocs: boolean) {
+    this.armed.set(false);
+    if (seeDocs) setTimeout(() => this.motion.scrollTo('#manual', -84), 80);
+    if (typeof IntersectionObserver === 'undefined' || this.motion.reduced) return;
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.querySelectorAll<HTMLElement>('.doc.is-new').forEach((d, i) => {
+          d.style.setProperty('--i', String(i));
+          d.classList.add('drop');
+        });
+        io.unobserve(e.target);
+      }
+    }, { rootMargin: '0px 0px -15% 0px' });
+    setTimeout(() => this.host.nativeElement.querySelectorAll('.docs').forEach((ul: Element) => {
+      if (ul.querySelector('.doc.is-new')) io.observe(ul);
+    }), 60);
   }
 
   protected go(ev: Event, id: string) {
