@@ -63,7 +63,7 @@ export const LADDER: { program: Program; long: string; teams: Team['id'][] }[] =
 
 /** TideChallenge milestones (local Guadalajara time). */
 export const MILESTONES = [
-  { id: 'manual', at: '2026-10-26T09:00:00-06:00' },
+  { id: 'manual', at: '2026-10-26T16:00:00-06:00' },
   { id: 'qaOpen', at: '2026-10-30T09:00:00-06:00' },
   { id: 'qaClose', at: '2026-11-20T23:59:00-06:00' },
   { id: 'event', at: '2026-12-05T08:00:00-06:00' },
