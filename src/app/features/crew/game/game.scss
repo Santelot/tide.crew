@@ -131,6 +131,7 @@
 .doc__kind[data-kind='Video'] { background: color-mix(in srgb, var(--tc-coral) 30%, transparent); color: #8a4220; }
 .doc__kind[data-kind='Formulario'] { background: color-mix(in srgb, var(--tc-success) 16%, transparent); color: #1f6b30; }
 .doc__kind[data-kind='CAD'] { background: color-mix(in srgb, var(--tc-info) 14%, transparent); color: #2c47b5; }
+.doc__kind[data-kind='Web'] { background: var(--tc-night); color: var(--tc-crest); }
 .doc__title { font: 700 1.15rem/1.2 var(--tc-font-title); }
 .doc__desc { font: 400 .95rem/1.5 var(--tc-font-body); color: color-mix(in srgb, var(--tc-night) 72%, transparent); }
 .doc__meta { display: flex; gap: .8rem; font-size: .82rem; color: var(--muted); }

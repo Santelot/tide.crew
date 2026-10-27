@@ -245,6 +245,7 @@ export class Game implements AfterViewInit, OnDestroy {
       case 'Enlace': return 'Abrir';
       case 'CAD': return 'Descargar STEP';
       case 'PDF': return 'Abrir PDF';
+      case 'Web': return 'Leer en línea';
       default: return 'Descargar';
     }
   }

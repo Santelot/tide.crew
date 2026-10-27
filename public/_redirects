@@ -3,4 +3,6 @@
 /               /FIRST          302!
 /first          /FIRST          301!
 /tidechallenge  /game           301!
+/game/manual    /frozen-blitz-manual/index.html  200!
+/game/manual/   /frozen-blitz-manual/index.html  200!
 /*              /index.html     200

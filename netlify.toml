@@ -26,6 +26,20 @@
   status = 301
   force = true
 
+# Web version of the FROZEN BLITZ manual: a static page in public/frozen-blitz-manual/,
+# served at tidecrew.co/game/manual (its <base href> points image paths at the real folder).
+[[redirects]]
+  from = "/game/manual"
+  to = "/frozen-blitz-manual/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/game/manual/"
+  to = "/frozen-blitz-manual/index.html"
+  status = 200
+  force = true
+
 # Single-page app fallback — must stay last.
 [[redirects]]
   from = "/*"
