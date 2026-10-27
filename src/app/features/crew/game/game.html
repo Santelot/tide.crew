@@ -111,7 +111,18 @@
           @if (s.items.length) {
             <ul class="docs">
               @for (m of s.items; track m.title) {
-                <li class="doc" [class.is-soon]="!m.href || locked(m)" [class.is-new]="!!m.releaseAt && !locked(m) && !!m.href">
+                <li class="doc" [class.is-soon]="!m.href || locked(m)" [class.is-new]="!!m.releaseAt && !locked(m) && !!m.href"
+                    [class.doc--video]="m.kind === 'Video' && !!yt(m.href)">
+                  @if (m.kind === 'Video' && yt(m.href); as vid) {
+                    @if (locked(m)) {
+                      <span class="vthumb vthumb--locked" aria-hidden="true"><i class="vthumb__play"></i></span>
+                    } @else {
+                      <button type="button" class="vthumb" (click)="openVideo(m)" [attr.aria-label]="'Reproducir ' + docTitle(m)">
+                        <img [src]="'https://i.ytimg.com/vi/' + vid + '/hqdefault.jpg'" alt="" loading="lazy" width="480" height="360" (error)="$any($event.target).style.display = 'none'" />
+                        <i class="vthumb__play" aria-hidden="true"></i>
+                      </button>
+                    }
+                  }
                   <span class="doc__kind" [attr.data-kind]="m.kind">{{ m.kind }}</span>
                   <span class="doc__title">{{ docTitle(m) }}</span>
                   <span class="doc__desc">{{ m.desc }}</span>
@@ -126,6 +137,8 @@
                     <span class="doc__act doc__act--soon doc__act--lock">Se libera el {{ fmt(m.releaseAt!, true) }} a las {{ fmtTime(m.releaseAt!) }}</span>
                   } @else if (m.href && m.href.startsWith('/game/')) {
                     <a class="doc__act" [routerLink]="m.href">{{ actionLabel(m) }} <span aria-hidden="true">→</span></a>
+                  } @else if (m.kind === 'Video' && yt(m.href)) {
+                    <a class="doc__act" [href]="m.href" (click)="openVideo(m, $event)">{{ actionLabel(m) }} <span aria-hidden="true">→</span><span class="sr"> — {{ m.title }}</span></a>
                   } @else if (m.href) {
                     <a class="doc__act" [href]="m.href"
                        [attr.target]="isExternal(m) || m.kind === 'PDF' ? '_blank' : null"
@@ -180,3 +193,18 @@
     </div>
   </div>
 </div>
+
+@if (player(); as p) {
+  <div class="vbox" role="dialog" aria-modal="true" [attr.aria-label]="p.title" (click)="closeVideo()">
+    <div class="vbox__in" (click)="$event.stopPropagation()">
+      <div class="vbox__bar">
+        <p class="vbox__t">{{ p.title }}</p>
+        <a class="vbox__yt" [href]="p.href" target="_blank" rel="noopener">Ver en YouTube ↗</a>
+        <button type="button" class="vbox__x" (click)="closeVideo()" aria-label="Cerrar video">✕</button>
+      </div>
+      <div class="vbox__frame">
+        <iframe [src]="p.src" [title]="p.title" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+}

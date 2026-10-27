@@ -1,6 +1,7 @@
 import {
   AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, computed, inject, signal, viewChild,
 } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { Ocean } from '../../../shared/ocean/ocean';
 import { Mark } from '../../../shared/mark/mark';
@@ -11,6 +12,12 @@ import { MILESTONES } from '../landing.content';
 import { CHALLENGE, GAME_NAME, MILESTONE_LABELS, Material, RELEASE_AT, SECTIONS } from './game.content';
 import { QaService } from './qa/qa.service';
 
+/** YouTube video id from a youtu.be / youtube.com link, or null. */
+export function youtubeId(href?: string): string | null {
+  const m = href?.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
 const pad = (n: number) => String(Math.max(0, n)).padStart(2, '0');
 
 @Component({
@@ -19,6 +26,7 @@ const pad = (n: number) => String(Math.max(0, n)).padStart(2, '0');
   imports: [RouterLink, Ocean, Mark, HubNav, Kickoff],
   templateUrl: './game.html',
   styleUrl: './game.scss',
+  host: { '(document:keydown.escape)': 'closeVideo()' },
 })
 export class Game implements AfterViewInit, OnDestroy {
   private readonly zone = inject(NgZone);
@@ -26,6 +34,10 @@ export class Game implements AfterViewInit, OnDestroy {
   protected readonly motion = inject(MotionService);
   private readonly qa = inject(QaService);
   protected readonly gameName = GAME_NAME;
+  private readonly sanitizer = inject(DomSanitizer);
+  protected readonly yt = youtubeId;
+  /** The video playing in the lightbox. */
+  protected readonly player = signal<{ title: string; src: SafeResourceUrl; href: string } | null>(null);
 
   protected readonly c = CHALLENGE;
   protected readonly sections = SECTIONS;
@@ -163,6 +175,22 @@ export class Game implements AfterViewInit, OnDestroy {
     setTimeout(() => this.host.nativeElement.querySelectorAll('.docs').forEach((ul: Element) => {
       if (ul.querySelector('.doc.is-new')) io.observe(ul);
     }), 60);
+  }
+
+  protected openVideo(m: Material, ev?: Event) {
+    const id = youtubeId(m.href);
+    if (!id) return;
+    ev?.preventDefault();
+    const src = this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`);
+    this.player.set({ title: this.docTitle(m), src, href: m.href! });
+    this.motion.lock(true);
+  }
+
+  protected closeVideo() {
+    if (!this.player()) return;
+    this.player.set(null);
+    this.motion.lock(false);
   }
 
   protected go(ev: Event, id: string) {

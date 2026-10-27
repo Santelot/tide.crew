@@ -98,7 +98,12 @@ export const SECTIONS: Section[] = [
     id: 'animacion',
     title: 'Animación del juego',
     items: [
-      { title: 'Animación oficial', desc: 'El reto en movimiento, de principio a fin de un match.', kind: 'Video' },
+      {
+        title: 'Animación oficial', revealTitle: 'Animación de FROZEN BLITZ', kind: 'Video',
+        desc: 'El reto en movimiento: cómo se arma un ICE CREAM, cómo se entrega y cómo se puntúa, de principio a fin de un match.',
+        href: 'https://youtu.be/w3Zc0Jyki6M', updated: '2026-10-26',
+        releaseAt: RELEASE_AT,
+      },
     ],
   },
   {
