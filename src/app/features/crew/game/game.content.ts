@@ -64,13 +64,13 @@ export const SECTIONS: Section[] = [
       {
         title: 'Manual del juego', revealTitle: 'Manual de FROZEN BLITZ', kind: 'PDF',
         desc: 'Juego, arena, reglas de robot, inspección y torneo. 105 páginas, en inglés.',
-        href: '/docs/tidechallenge/frozen-blitz-manual-v1.4-28910b62.pdf', version: '1.4', updated: '2026-10-26', size: '4.7 MB',
+        href: '/docs/tidechallenge/frozen-blitz-manual-v1.5-b2c8a19d.pdf', version: '1.5', updated: '2026-11-02', size: '4.9 MB',
         releaseAt: RELEASE_AT,
       },
       {
         title: 'Manual web', kind: 'Web',
         desc: 'El mismo manual, hecho para leerse en el celular: buscador de reglas, índice, modo oscuro y calculadora de puntaje.',
-        href: '/game/manual', version: '1.4', updated: '2026-10-26',
+        href: '/game/manual', version: '1.5', updated: '2026-11-02',
         releaseAt: RELEASE_AT,
       },
       {
@@ -88,8 +88,8 @@ export const SECTIONS: Section[] = [
     items: [
       {
         title: 'Planos del campo', kind: 'PDF',
-        desc: 'Las 13 láminas del campo con sus cotas (FB-00 a FB-12). Si algo difiere del CAD, manda el CAD.',
-        href: '/docs/tidechallenge/frozen-blitz-field-drawings-v1.4-28910b62.pdf', version: '1.4', updated: '2026-10-26', size: '4.2 MB',
+        desc: 'Las 14 láminas del campo con sus cotas (FB-00 a FB-13, con la ubicación de los AprilTags). Si algo difiere del CAD, manda el CAD.',
+        href: '/docs/tidechallenge/frozen-blitz-field-drawings-v1.5-b2c8a19d.pdf', version: '1.5', updated: '2026-11-02', size: '4.7 MB',
         releaseAt: RELEASE_AT,
       },
       {
@@ -97,6 +97,11 @@ export const SECTIONS: Section[] = [
         desc: 'El ensamble completo del campo en STEP (AP214), listo para SolidWorks, Onshape, Fusion o Inventor. Si algo difiere de los planos, manda el CAD.',
         href: '/docs/tidechallenge/frozen-blitz-field-cad-v1.4-28910b62.zip', version: '1.4', updated: '2026-10-26', size: '5.1 MB (ZIP)',
         releaseAt: RELEASE_AT,
+      },
+      {
+        title: 'AprilTags para imprimir', kind: 'PDF',
+        desc: 'Los 8 AprilTags del campo (familia 36h11, IDs 1 a 8), uno por hoja, con su ubicación. Imprime al 100%, sin ajustar a la página.',
+        href: '/docs/tidechallenge/frozen-blitz-apriltags-36h11-ids-1-8-b2c8a19d.pdf', updated: '2026-11-02', size: '0.1 MB',
       },
     ],
   },
@@ -116,7 +121,13 @@ export const SECTIONS: Section[] = [
     id: 'actualizaciones',
     title: 'Actualizaciones',
     intro: 'Los Team Updates salen cada jueves antes de las 10:00 pm (hora de Guadalajara), desde el primer jueves después del Kickoff hasta el jueves previo al evento. Se anuncian en la comunidad de WhatsApp y quedan aquí.',
-    items: [],
+    items: [
+      {
+        title: 'Team Update 01', kind: 'PDF',
+        desc: 'Llegan los AprilTags: 8 en el campo (nueva sección 4.9). Y la excepción de extensión del END GAME ya aplica al tocar las mesas del CHECKOUT ZONE, para poder subirse (G418, R105). Viene con el manual v1.5 y los planos Rev 1.5.',
+        href: '/docs/tidechallenge/frozen-blitz-team-update-01-b2c8a19d.pdf', updated: '2026-11-02', size: '0.7 MB',
+      },
+    ],
     empty: 'Todavía no hay actualizaciones. Cuando se publique la primera, aparecerá aquí con su fecha.',
   },
   {
