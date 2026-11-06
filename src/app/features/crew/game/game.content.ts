@@ -64,13 +64,13 @@ export const SECTIONS: Section[] = [
       {
         title: 'Manual del juego', revealTitle: 'Manual de FROZEN BLITZ', kind: 'PDF',
         desc: 'Juego, arena, reglas de robot, inspección y torneo. 105 páginas, en inglés.',
-        href: '/docs/tidechallenge/frozen-blitz-manual-v1.5-b2c8a19d.pdf', version: '1.5', updated: '2026-11-02', size: '4.9 MB',
+        href: '/docs/tidechallenge/frozen-blitz-manual-v1.6-a9cf360f.pdf', version: '1.6', updated: '2026-11-05', size: '4.9 MB',
         releaseAt: RELEASE_AT,
       },
       {
         title: 'Manual web', kind: 'Web',
         desc: 'El mismo manual, hecho para leerse en el celular: buscador de reglas, índice, modo oscuro y calculadora de puntaje.',
-        href: '/game/manual', version: '1.5', updated: '2026-11-02',
+        href: '/game/manual', version: '1.6', updated: '2026-11-05',
         releaseAt: RELEASE_AT,
       },
       {
@@ -122,6 +122,11 @@ export const SECTIONS: Section[] = [
     title: 'Actualizaciones',
     intro: 'Los Team Updates salen cada jueves antes de las 10:00 pm (hora de Guadalajara), desde el primer jueves después del Kickoff hasta el jueves previo al evento. Se anuncian en la comunidad de WhatsApp y quedan aquí.',
     items: [
+      {
+        title: 'Team Update 02', kind: 'PDF',
+        desc: 'Cómo se cuentan los CONES y SCOOPS de AUTO: valen donde esté su stack o ICE CREAM al terminar AUTO, aunque ya no esté en el SCOOPING STATION (5.5, 5.5.1 y Tabla 5-3). Viene con el manual v1.6; la calculadora del manual web ya está actualizada.',
+        href: '/docs/tidechallenge/frozen-blitz-team-update-02-a9cf360f.pdf', updated: '2026-11-05', size: '0.2 MB',
+      },
       {
         title: 'Team Update 01', kind: 'PDF',
         desc: 'Llegan los AprilTags: 8 en el campo (nueva sección 4.9). Y la excepción de extensión del END GAME ya aplica al tocar las mesas del CHECKOUT ZONE, para poder subirse (G418, R105). Viene con el manual v1.5 y los planos Rev 1.5.',
